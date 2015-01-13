@@ -5,8 +5,6 @@ namespace Kvant {
 
 [ExecuteInEditMode]
 [DisallowMultipleComponent]
-[RequireComponent(typeof(MeshFilter))]
-[RequireComponent(typeof(MeshRenderer))]
 [AddComponentMenu("Kvant/Fractal Tunnel")]
 public class Tunnel : MonoBehaviour
 {
@@ -107,9 +105,10 @@ public class Tunnel : MonoBehaviour
 
     #endregion
 
-    #region Misc Variables
+    #region Private Objects
 
-    bool needsReset = true;
+    Mesh _mesh;
+    bool _needsReset = true;
 
     #endregion
 
@@ -117,7 +116,7 @@ public class Tunnel : MonoBehaviour
 
     public void NotifyConfigChanged()
     {
-        needsReset = true;
+        _needsReset = true;
     }
 
     void SanitizeParameters()
@@ -169,35 +168,21 @@ public class Tunnel : MonoBehaviour
         _surfaceMaterial1.SetTexture("_NormalTex", _normalBuffer1);
         _surfaceMaterial2.SetTexture("_NormalTex", _normalBuffer2);
 
-        // Mesh filter.
-        var meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter.sharedMesh) DestroyImmediate(meshFilter.sharedMesh);
-        meshFilter.sharedMesh = Lattice.Build(_slices, _stacks);
-        meshFilter.sharedMesh.hideFlags = HideFlags.DontSave;
+        // Mesh.
+        if (_mesh) DestroyImmediate(_mesh);
+        _mesh = Lattice.Build(_slices, _stacks);
+        _mesh.hideFlags = HideFlags.DontSave;
 
-        // Mesh renderer.
-        renderer.sharedMaterials = new Material[3] {
-            _surfaceMaterial1,
-            _surfaceMaterial2,
-            _lineMaterial
-        };
-
-        needsReset = false;
+        _needsReset = false;
     }
 
     #endregion
 
     #region MonoBehaviour Functions
 
-    void Awake()
-    {
-        GetComponent<MeshFilter>().sharedMesh = null;
-        renderer.sharedMaterials = new Material[1] { null };
-    }
-
     void Update()
     {
-        if (needsReset) ResetResources();
+        if (_needsReset) ResetResources();
 
         var sy = (float)(_stacks + 1) / _stacks;
         _constructMaterial.SetVector("_Size", new Vector2(_radius, _height * sy));
@@ -213,6 +198,10 @@ public class Tunnel : MonoBehaviour
         Graphics.Blit(null, _positionBuffer, _constructMaterial, 0);
         Graphics.Blit(_positionBuffer, _normalBuffer1, _constructMaterial, 1);
         Graphics.Blit(_positionBuffer, _normalBuffer2, _constructMaterial, 2);
+
+        Graphics.DrawMesh(_mesh, transform.position, transform.rotation, _surfaceMaterial1, 0, null, 0);
+        Graphics.DrawMesh(_mesh, transform.position, transform.rotation, _surfaceMaterial2, 0, null, 1);
+        Graphics.DrawMesh(_mesh, transform.position, transform.rotation, _lineMaterial, 0, null, 2);
     }
 
     void OnGUI()

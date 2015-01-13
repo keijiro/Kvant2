@@ -123,8 +123,6 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 678818588}
-  - 23: {fileID: 678818587}
-  - 33: {fileID: 678818586}
   - 114: {fileID: 678818585}
   m_Layer: 0
   m_Name: Tunnel
@@ -160,35 +158,6 @@ MonoBehaviour:
   _surfaceShader: {fileID: 4800000, guid: f33edb5130bfa478388adbb7df3b9b8a, type: 3}
   _lineShader: {fileID: 4800000, guid: ed2825438c1e0421d9e72e12fac0521b, type: 3}
   _debugShader: {fileID: 4800000, guid: 8e25f1b2c1f18429a884abde60e27b2d, type: 3}
---- !u!33 &678818586
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 678818584}
-  m_Mesh: {fileID: 0}
---- !u!23 &678818587
-Renderer:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 678818584}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_LightmapIndex: 255
-  m_LightmapTilingOffset: {x: 1, y: 1, z: 0, w: 0}
-  m_Materials:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  m_SubsetIndices: 
-  m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 0
-  m_LightProbeAnchor: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
 --- !u!4 &678818588
 Transform:
   m_ObjectHideFlags: 0
