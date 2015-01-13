@@ -4,7 +4,8 @@
     {
         _MainTex("-", 2D) = ""{}
         _Size("-", Vector) = (5, 5, 0, 0)
-        _OffsetRepeat("-", Vector) = (0, 0, 0, 0)
+        _Offset("-", Vector) = (0, 0, 0, 0)
+        _Repeat("-", Vector) = (1, 1, 0, 0)
         _Density("-", Vector) = (1, 1, 0, 0)
         _Displace("-", Vector) = (0.3, 0.3, 0.3, 0)
     }
@@ -19,7 +20,8 @@
     sampler2D _MainTex;
     float2 _MainTex_TexelSize;
     float2 _Size;
-    float4 _OffsetRepeat;
+    float2 _Offset;
+    float2 _Repeat;
     float2 _Density;
     float3 _Displace;
 
@@ -28,7 +30,7 @@
     {
         float x = cos(uv.x * PI2);
         float y = sin(uv.x * PI2);
-        float z = (uv.y - 0.5);
+        float z = uv.y - 0.5;
         return float3(x, y, z) * _Size.xxy;
     }
 
@@ -37,11 +39,11 @@
     {
         float3 vp = cylinder(i.uv);
 
-        float2 np1 = i.uv * _Density + _OffsetRepeat.xy;
+        float2 np1 = i.uv * _Density + _Offset;
         float2 np2 = np1 + float2(12.343, 31.591);
         float2 np3 = np1 + float2(27.534, 17.392);
 
-        float2 nr = _OffsetRepeat.zw;
+        float2 nr = _Repeat;
 
         float n1 = pnoise(np1, nr) + pnoise(np1 * 2, nr * 2) * 0.5 + pnoise(np1 * 4, nr * 4) * 0.25;
         float n2 = pnoise(np2, nr) + pnoise(np2 * 2, nr * 2) * 0.5 + pnoise(np2 * 4, nr * 4) * 0.25;

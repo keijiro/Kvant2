@@ -31,7 +31,7 @@ public class Lattice
     static public Mesh Build(int columns, int rows)
     {
         var Nx = columns;
-        var Ny = rows;
+        var Ny = rows + 1;
 
         var Sx = 1.0f / Nx;
         var Sy = 1.0f / Ny;

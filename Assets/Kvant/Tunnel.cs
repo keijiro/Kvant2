@@ -10,7 +10,7 @@ namespace Kvant {
 [AddComponentMenu("Kvant/Fractal Tunnel")]
 public class Tunnel : MonoBehaviour
 {
-    #region Tunnel Parameters
+    #region Parameters Exposed To Editor
 
     [SerializeField] float _radius = 5;
     [SerializeField] float _height = 10;
@@ -29,6 +29,58 @@ public class Tunnel : MonoBehaviour
     [SerializeField] Color _lineColor = Color.white;
 
     [SerializeField] bool _debug;
+
+    #endregion
+
+    #region Public Properties
+
+    public float radius {
+        get { return _radius; }
+        set { _radius = value; }
+    }
+
+    public float height {
+        get { return _height; }
+        set { _height = value; }
+    }
+
+    public int slices { get { return _slices; } }
+    public int stacks { get { return _stacks; } }
+
+    public float offset {
+        get { return _offset; }
+        set { _offset = value; }
+    }
+
+    public int repeat {
+        get { return _repeat; }
+        set { _repeat = value; }
+    }
+
+    public int density {
+        get { return _density; }
+        set { _density = value; }
+    }
+
+    public float bump {
+        get { return _bump; }
+        set { _bump = value; }
+    }
+
+    public float warp {
+        get { return _warp; }
+        set { _warp = value; }
+    }
+
+    public Color surfaceColor {
+        get { return _surfaceColor; }
+        set { _surfaceColor = value; }
+    }
+
+    public Color lineColor {
+        get { return _lineColor; }
+        set { _lineColor = value; }
+    }
 
     #endregion
 
@@ -70,13 +122,13 @@ public class Tunnel : MonoBehaviour
 
     void SanitizeParameters()
     {
-        _stacks = Mathf.Clamp(_stacks, 8, 100);
         _slices = Mathf.Clamp(_slices, 8, 100);
+        _stacks = Mathf.Clamp(_stacks, 8, 100);
     }
 
     RenderTexture CreateBuffer()
     {
-        var buffer = new RenderTexture(_slices * 2, _stacks, 0, RenderTextureFormat.ARGBFloat);
+        var buffer = new RenderTexture(_slices * 2, _stacks + 1, 0, RenderTextureFormat.ARGBFloat);
         buffer.hideFlags = HideFlags.DontSave;
         buffer.filterMode = FilterMode.Point;
         buffer.wrapMode = TextureWrapMode.Repeat;
@@ -121,6 +173,7 @@ public class Tunnel : MonoBehaviour
         var meshFilter = GetComponent<MeshFilter>();
         if (meshFilter.sharedMesh) DestroyImmediate(meshFilter.sharedMesh);
         meshFilter.sharedMesh = Lattice.Build(_slices, _stacks);
+        meshFilter.sharedMesh.hideFlags = HideFlags.DontSave;
 
         // Mesh renderer.
         renderer.sharedMaterials = new Material[3] {
@@ -140,9 +193,11 @@ public class Tunnel : MonoBehaviour
     {
         if (needsReset) ResetResources();
 
-        _constructMaterial.SetVector("_Size", new Vector2(_radius, _height));
-        _constructMaterial.SetVector("_OffsetRepeat", new Vector4(0, _offset, _density, _repeat));
-        _constructMaterial.SetVector("_Density", new Vector2(_density, _density));
+        var sy = (float)(_stacks + 1) / _stacks;
+        _constructMaterial.SetVector("_Size", new Vector2(_radius, _height * sy));
+        _constructMaterial.SetVector("_Offset", new Vector2(0, _offset));
+        _constructMaterial.SetVector("_Repeat", new Vector3(1, _repeat));
+        _constructMaterial.SetVector("_Density", new Vector2(_density, _density * sy));
         _constructMaterial.SetVector("_Displace", new Vector3(_bump, _warp, _warp));
 
         _surfaceMaterial1.SetColor("_Color", _surfaceColor);
