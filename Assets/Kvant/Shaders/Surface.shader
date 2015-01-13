@@ -4,10 +4,12 @@
     {
         _PositionTex("-", 2D) = ""{}
         _NormalTex("-", 2D) = ""{}
+        _Color("-", Color) = (1, 1, 1, 1)
     }
     SubShader
     {
         Tags { "RenderType"="Opaque" }
+        Offset 1, 1
         
         CGPROGRAM
 
@@ -19,6 +21,8 @@
 
         sampler2D _NormalTex;
         float4 _NormalTex_TexelSize;
+
+        float4 _Color;
 
         struct Input
         {
@@ -39,7 +43,7 @@
 
         void surf(Input IN, inout SurfaceOutput o)
         {
-            o.Albedo = float3(1, 1, 1);
+            o.Albedo = _Color.rgb;
             o.Alpha = 1;
         }
 

@@ -3,11 +3,8 @@
     Properties
     {
         _MainTex("-", 2D) = ""{}
-
-        _Radius("-", Float) = 5
-        _Height("-", Float) = 5
-
-        _Offset("-", Vector) = (0, 0, 0, 0)
+        _Size("-", Vector) = (5, 5, 0, 0)
+        _OffsetRepeat("-", Vector) = (0, 0, 0, 0)
         _Density("-", Vector) = (1, 1, 0, 0)
         _Displace("-", Vector) = (0.3, 0.3, 0.3, 0)
     }
@@ -21,37 +18,34 @@
 
     sampler2D _MainTex;
     float2 _MainTex_TexelSize;
-
-    float _Radius;
-    float _Height;
-
-    float2 _Offset;
+    float2 _Size;
+    float4 _OffsetRepeat;
     float2 _Density;
     float3 _Displace;
 
     // Base shape (cylinder).
     float3 cylinder(float2 uv)
     {
-        float x = cos(uv.x * PI2) * _Radius;
-        float y = sin(uv.x * PI2) * _Radius;
-        float z = (uv.y - 0.5) * _Height;
-        return float3(x, y, z);
+        float x = cos(uv.x * PI2);
+        float y = sin(uv.x * PI2);
+        float z = (uv.y - 0.5);
+        return float3(x, y, z) * _Size.xxy;
     }
 
     // Pass0: position
     float4 frag_pos(v2f_img i) : SV_Target 
     {
         float3 vp = cylinder(i.uv);
-        float2 np = i.uv * _Density;
-        float2 nr = float2(1, 1) * _Density;
 
-        float2 no1 = _Offset;
-        float2 no2 = _Offset + float2(0, 31.5912);
-        float2 no3 = _Offset + float2(27.534, 0);
+        float2 np1 = i.uv * _Density + _OffsetRepeat.xy;
+        float2 np2 = np1 + float2(12.343, 31.591);
+        float2 np3 = np1 + float2(27.534, 17.392);
 
-        float n1 = pnoise(np + no1, nr) + pnoise(np * 2 + no1, nr * 2) * 0.5 + pnoise(np * 4 + no1, nr * 4) * 0.25;
-        float n2 = pnoise(np + no2, nr) + pnoise(np * 2 + no2, nr * 2) * 0.5 + pnoise(np * 4 + no2, nr * 4) * 0.25;
-        float n3 = pnoise(np + no3, nr) + pnoise(np * 2 + no3, nr * 2) * 0.5 + pnoise(np * 4 + no3, nr * 4) * 0.25;
+        float2 nr = _OffsetRepeat.zw;
+
+        float n1 = pnoise(np1, nr) + pnoise(np1 * 2, nr * 2) * 0.5 + pnoise(np1 * 4, nr * 4) * 0.25;
+        float n2 = pnoise(np2, nr) + pnoise(np2 * 2, nr * 2) * 0.5 + pnoise(np2 * 4, nr * 4) * 0.25;
+        float n3 = pnoise(np3, nr) + pnoise(np3 * 2, nr * 2) * 0.5 + pnoise(np3 * 4, nr * 4) * 0.25;
 
         float3 v1 = normalize(vp * float3(-1, -1, 0));
         float3 v2 = float3(0, 0, 1);
@@ -99,6 +93,7 @@
         // Pass0: position
         Pass
         {
+            Fog { Mode off }    
             CGPROGRAM
             #pragma target 3.0
             #pragma glsl
@@ -109,6 +104,7 @@
         // Pass1: normal vector for the 1st submesh
         Pass
         {
+            Fog { Mode off }    
             CGPROGRAM
             #pragma target 3.0
             #pragma glsl
@@ -119,6 +115,7 @@
         // Pass2: normal vector for the 2nd submesh
         Pass
         {
+            Fog { Mode off }    
             CGPROGRAM
             #pragma target 3.0
             #pragma glsl

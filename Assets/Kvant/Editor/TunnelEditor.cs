@@ -14,9 +14,14 @@ public class TunnelEditor : Editor
     SerializedProperty propStacks;
 
     SerializedProperty propOffset;
+    SerializedProperty propRepeat;
+
     SerializedProperty propDensity;
     SerializedProperty propBump;
     SerializedProperty propWarp;
+
+    SerializedProperty propSurfaceColor;
+    SerializedProperty propLineColor;
 
     SerializedProperty propDebug;
 
@@ -28,10 +33,15 @@ public class TunnelEditor : Editor
         propSlices = serializedObject.FindProperty("_slices");
         propStacks = serializedObject.FindProperty("_stacks");
 
-        propOffset  = serializedObject.FindProperty("_offset");
+        propOffset = serializedObject.FindProperty("_offset");
+        propRepeat = serializedObject.FindProperty("_repeat");
+
         propDensity = serializedObject.FindProperty("_density");
         propBump    = serializedObject.FindProperty("_bump");
         propWarp    = serializedObject.FindProperty("_warp");
+
+        propSurfaceColor = serializedObject.FindProperty("_surfaceColor");
+        propLineColor    = serializedObject.FindProperty("_lineColor");
 
         propDebug   = serializedObject.FindProperty("_debug");
     }
@@ -54,9 +64,18 @@ public class TunnelEditor : Editor
         EditorGUILayout.Space();
 
         EditorGUILayout.PropertyField(propOffset);
+        EditorGUILayout.PropertyField(propRepeat);
+
+        EditorGUILayout.Space();
+
         EditorGUILayout.PropertyField(propDensity);
         EditorGUILayout.PropertyField(propBump);
         EditorGUILayout.PropertyField(propWarp);
+
+        EditorGUILayout.Space();
+
+        EditorGUILayout.PropertyField(propSurfaceColor);
+        EditorGUILayout.PropertyField(propLineColor);
 
         EditorGUILayout.Space();
 

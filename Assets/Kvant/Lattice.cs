@@ -71,7 +71,7 @@ public class Lattice
             }
         }
 
-        // Index arrays.
+        // Index arrays for the 1st and 2nd submesh (surfaces).
         var IA1 = new int[Nx * (Ny - 1) * 3];
         var IA2 = new int[Nx * (Ny - 1) * 3];
         for (var iIA = 0; iIA < IA1.Length; iIA++)
@@ -80,14 +80,32 @@ public class Lattice
             IA2[iIA] = iIA + IA1.Length;
         }
 
+        // Index array for the 3rd submesh (lines).
+        var IA3 = new int[Nx * (Ny - 1) * 6];
+        var iIA3a = 0;
+        var iIA3b = 0;
+        for (var Iy = 0; Iy < Ny - 1; Iy++)
+        {
+            for (var Ix = 0; Ix < Nx; Ix++, iIA3b += 3)
+            {
+                IA3[iIA3a++] = iIA3b;
+                IA3[iIA3a++] = iIA3b + 1;
+                IA3[iIA3a++] = iIA3b;
+                IA3[iIA3a++] = iIA3b + 2;
+                IA3[iIA3a++] = iIA3b;
+                IA3[iIA3a++] = iIA3b + IA1.Length + 2;
+            }
+        }
+
         // Construct a mesh.
         var mesh = new Mesh();
-        mesh.subMeshCount = 2;
+        mesh.subMeshCount = 3;
         mesh.vertices = new Vector3[TA1.Length];
         mesh.uv = TA1;
         mesh.uv2 = TA2;
         mesh.SetIndices(IA1, MeshTopology.Triangles, 0);
         mesh.SetIndices(IA2, MeshTopology.Triangles, 1);
+        mesh.SetIndices(IA3, MeshTopology.Lines, 2);
         mesh.Optimize();
 
         // Avoid being culled.

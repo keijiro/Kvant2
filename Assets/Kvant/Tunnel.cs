@@ -19,9 +19,14 @@ public class Tunnel : MonoBehaviour
     [SerializeField] int _stacks = 40;
 
     [SerializeField] float _offset = 1;
+    [SerializeField] int _repeat = 100;
+
     [SerializeField] int _density = 1;
     [SerializeField] float _bump = 1;
     [SerializeField] float _warp = 1;
+
+    [SerializeField] Color _surfaceColor = Color.white;
+    [SerializeField] Color _lineColor = Color.white;
 
     [SerializeField] bool _debug;
 
@@ -31,11 +36,13 @@ public class Tunnel : MonoBehaviour
 
     [SerializeField] Shader _constructShader;
     [SerializeField] Shader _surfaceShader;
+    [SerializeField] Shader _lineShader;
     [SerializeField] Shader _debugShader;
 
     Material _constructMaterial;
     Material _surfaceMaterial1;
     Material _surfaceMaterial2;
+    Material _lineMaterial;
     Material _debugMaterial;
 
     #endregion
@@ -100,10 +107,13 @@ public class Tunnel : MonoBehaviour
         if (!_constructMaterial) _constructMaterial = CreateMaterial(_constructShader);
         if (!_surfaceMaterial1 ) _surfaceMaterial1  = CreateMaterial(_surfaceShader  );
         if (!_surfaceMaterial2 ) _surfaceMaterial2  = CreateMaterial(_surfaceShader  );
+        if (!_lineMaterial     ) _lineMaterial      = CreateMaterial(_lineShader     );
         if (!_debugMaterial    ) _debugMaterial     = CreateMaterial(_debugShader    );
 
         _surfaceMaterial1.SetTexture("_PositionTex", _positionBuffer);
         _surfaceMaterial2.SetTexture("_PositionTex", _positionBuffer);
+        _lineMaterial    .SetTexture("_PositionTex", _positionBuffer);
+
         _surfaceMaterial1.SetTexture("_NormalTex", _normalBuffer1);
         _surfaceMaterial2.SetTexture("_NormalTex", _normalBuffer2);
 
@@ -113,7 +123,11 @@ public class Tunnel : MonoBehaviour
         meshFilter.sharedMesh = Lattice.Build(_slices, _stacks);
 
         // Mesh renderer.
-        renderer.sharedMaterials = new Material[2] { _surfaceMaterial1, _surfaceMaterial2 };
+        renderer.sharedMaterials = new Material[3] {
+            _surfaceMaterial1,
+            _surfaceMaterial2,
+            _lineMaterial
+        };
 
         needsReset = false;
     }
@@ -126,11 +140,14 @@ public class Tunnel : MonoBehaviour
     {
         if (needsReset) ResetResources();
 
-        _constructMaterial.SetFloat("_Radius", _radius);
-        _constructMaterial.SetFloat("_Height", _height);
-        _constructMaterial.SetVector("_Offset", new Vector2(0, _offset));
+        _constructMaterial.SetVector("_Size", new Vector2(_radius, _height));
+        _constructMaterial.SetVector("_OffsetRepeat", new Vector4(0, _offset, _density, _repeat));
         _constructMaterial.SetVector("_Density", new Vector2(_density, _density));
         _constructMaterial.SetVector("_Displace", new Vector3(_bump, _warp, _warp));
+
+        _surfaceMaterial1.SetColor("_Color", _surfaceColor);
+        _surfaceMaterial2.SetColor("_Color", _surfaceColor);
+        _lineMaterial.SetColor("_Color", _lineColor);
 
         Graphics.Blit(null, _positionBuffer, _constructMaterial, 0);
         Graphics.Blit(_positionBuffer, _normalBuffer1, _constructMaterial, 1);
