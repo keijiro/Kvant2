@@ -189,6 +189,12 @@ public class Tunnel : MonoBehaviour
 
     #region MonoBehaviour Functions
 
+    void Awake()
+    {
+        GetComponent<MeshFilter>().sharedMesh = null;
+        renderer.sharedMaterials = new Material[1] { null };
+    }
+
     void Update()
     {
         if (needsReset) ResetResources();
