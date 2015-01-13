@@ -30,10 +30,8 @@
             float2 uv1 = v.texcoord;
             float2 uv2 = v.texcoord1;
 
-#ifdef UNITY_HALF_TEXEL_OFFSET
             uv1 += _PositionTex_TexelSize.xy * 0.5;
             uv2 += _NormalTex_TexelSize.xy * 0.5;
-#endif
 
             v.vertex.xyz += tex2D(_PositionTex, uv1).xyz;
             v.normal = tex2D(_NormalTex, uv2).xyz;
