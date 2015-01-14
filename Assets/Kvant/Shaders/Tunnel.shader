@@ -5,7 +5,7 @@
         _MainTex("-", 2D) = ""{}
         _Size("-", Vector) = (5, 5, 0, 0)
         _Offset("-", Vector) = (0, 0, 0, 0)
-        _Repeat("-", Vector) = (1, 1, 0, 0)
+        _Period("-", Vector) = (1, 1, 0, 0)
         _Density("-", Vector) = (1, 1, 0, 0)
         _Displace("-", Vector) = (0.3, 0.3, 0.3, 0)
     }
@@ -21,7 +21,7 @@
     float2 _MainTex_TexelSize;
     float2 _Size;
     float2 _Offset;
-    float2 _Repeat;
+    float2 _Period;
     float2 _Density;
     float3 _Displace;
 
@@ -39,15 +39,15 @@
     {
         float3 vp = cylinder(i.uv);
 
-        float2 np1 = i.uv * _Density + _Offset;
-        float2 np2 = np1 + float2(12.343, 31.591);
-        float2 np3 = np1 + float2(27.534, 17.392);
+        float2 nc1 = i.uv * _Density + _Offset;
+        float2 nc2 = nc1 + float2(124.343, 311.591);
+        float2 nc3 = nc1 + float2(273.534, 178.392);
 
-        float2 nr = _Repeat;
+        float2 np = _Period;
 
-        float n1 = pnoise(np1, nr) + pnoise(np1 * 2, nr * 2) * 0.5 + pnoise(np1 * 4, nr * 4) * 0.25;
-        float n2 = pnoise(np2, nr) + pnoise(np2 * 2, nr * 2) * 0.5 + pnoise(np2 * 4, nr * 4) * 0.25;
-        float n3 = pnoise(np3, nr) + pnoise(np3 * 2, nr * 2) * 0.5 + pnoise(np3 * 4, nr * 4) * 0.25;
+        float n1 = pnoise(nc1, np) + pnoise(nc1 * 2, np * 2) * 0.5 + pnoise(nc1 * 4, np * 4) * 0.25 + pnoise(nc1 * 8, np * 8) * 0.125;
+        float n2 = pnoise(nc2, np) + pnoise(nc2 * 2, np * 2) * 0.5 + pnoise(nc2 * 4, np * 4) * 0.25 + pnoise(nc1 * 8, np * 8) * 0.125;
+        float n3 = pnoise(nc3, np) + pnoise(nc3 * 2, np * 2) * 0.5 + pnoise(nc3 * 4, np * 4) * 0.25 + pnoise(nc1 * 8, np * 8) * 0.125;
 
         float3 v1 = normalize(vp * float3(-1, -1, 0));
         float3 v2 = float3(0, 0, 1);
@@ -69,7 +69,7 @@
         float3 v2 = tex2D(_MainTex, i.uv + float2(-1, 1) * duv).xyz;
         float3 v3 = tex2D(_MainTex, i.uv + float2( 1, 1) * duv).xyz;
 
-        float3 n = normalize(cross(v2 - v1, v3 - v2));
+        float3 n = normalize(cross(v2 - v1, v3 - v1));
 
         return float4(n, 0);
     }

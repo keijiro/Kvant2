@@ -4,27 +4,26 @@ using System.Collections;
 namespace Kvant {
 
 [ExecuteInEditMode]
-[DisallowMultipleComponent]
-[AddComponentMenu("Kvant/Fractal Tunnel")]
+[AddComponentMenu("Kvant/Tunnel")]
 public class Tunnel : MonoBehaviour
 {
     #region Parameters Exposed To Editor
 
     [SerializeField] float _radius = 5;
-    [SerializeField] float _height = 10;
+    [SerializeField] float _height = 20;
 
-    [SerializeField] int _slices = 40;
-    [SerializeField] int _stacks = 40;
+    [SerializeField] int _slices = 8;
+    [SerializeField] int _stacks = 10;
 
-    [SerializeField] float _offset = 1;
-    [SerializeField] int _repeat = 100;
+    [SerializeField] float _offset = 0;
+    [SerializeField] float _twist = 0;
 
-    [SerializeField] int _density = 1;
-    [SerializeField] float _bump = 1;
-    [SerializeField] float _warp = 1;
+    [SerializeField] int _density = 4;
+    [SerializeField] float _bump = 0;
+    [SerializeField] float _warp = 0;
 
-    [SerializeField] Color _surfaceColor = Color.white;
-    [SerializeField] Color _lineColor = Color.white;
+    [SerializeField] Color _surfaceColor = new Color(0.8f, 0.8f, 0.8f, 1);
+    [SerializeField] Color _lineColor = new Color(1, 1, 1, 0);
 
     [SerializeField] bool _debug;
 
@@ -50,9 +49,9 @@ public class Tunnel : MonoBehaviour
         set { _offset = value; }
     }
 
-    public int repeat {
-        get { return _repeat; }
-        set { _repeat = value; }
+    public float twist {
+        get { return _twist; }
+        set { _twist = value; }
     }
 
     public int density {
@@ -107,7 +106,7 @@ public class Tunnel : MonoBehaviour
 
     #region Private Objects
 
-    Mesh _mesh;
+    Lattice _lattice;
     bool _needsReset = true;
 
     #endregion
@@ -121,8 +120,8 @@ public class Tunnel : MonoBehaviour
 
     void SanitizeParameters()
     {
-        _slices = Mathf.Clamp(_slices, 8, 100);
-        _stacks = Mathf.Clamp(_stacks, 8, 100);
+        _slices = Mathf.Clamp(_slices, 8, 255);
+        _stacks = Mathf.Clamp(_stacks, 8, 1023);
     }
 
     RenderTexture CreateBuffer()
@@ -169,9 +168,10 @@ public class Tunnel : MonoBehaviour
         _surfaceMaterial2.SetTexture("_NormalTex", _normalBuffer2);
 
         // Mesh.
-        if (_mesh) DestroyImmediate(_mesh);
-        _mesh = Lattice.Build(_slices, _stacks);
-        _mesh.hideFlags = HideFlags.DontSave;
+        if (_lattice == null)
+            _lattice = new Lattice(_slices, _stacks);
+        else
+            _lattice.Rebuild(_slices, _stacks);
 
         _needsReset = false;
     }
@@ -180,15 +180,22 @@ public class Tunnel : MonoBehaviour
 
     #region MonoBehaviour Functions
 
+    void Reset()
+    {
+        _needsReset = true;
+    }
+
     void Update()
     {
         if (_needsReset) ResetResources();
 
-        var sy = (float)(_stacks + 1) / _stacks;
-        _constructMaterial.SetVector("_Size", new Vector2(_radius, _height * sy));
-        _constructMaterial.SetVector("_Offset", new Vector2(0, _offset));
-        _constructMaterial.SetVector("_Repeat", new Vector3(1, _repeat));
-        _constructMaterial.SetVector("_Density", new Vector2(_density, _density * sy));
+        var height = _height * (_stacks + 1) / _stacks;
+        var vdensity = _density / (Mathf.PI * 2 * _radius);
+
+        _constructMaterial.SetVector("_Size", new Vector2(_radius, height));
+        _constructMaterial.SetVector("_Offset", new Vector2(_twist * density, _offset * vdensity));
+        _constructMaterial.SetVector("_Period", new Vector3(1, 10000));
+        _constructMaterial.SetVector("_Density", new Vector2(_density, vdensity * height));
         _constructMaterial.SetVector("_Displace", new Vector3(_bump, _warp, _warp));
 
         _surfaceMaterial1.SetColor("_Color", _surfaceColor);
@@ -199,9 +206,13 @@ public class Tunnel : MonoBehaviour
         Graphics.Blit(_positionBuffer, _normalBuffer1, _constructMaterial, 1);
         Graphics.Blit(_positionBuffer, _normalBuffer2, _constructMaterial, 2);
 
-        Graphics.DrawMesh(_mesh, transform.position, transform.rotation, _surfaceMaterial1, 0, null, 0);
-        Graphics.DrawMesh(_mesh, transform.position, transform.rotation, _surfaceMaterial2, 0, null, 1);
-        Graphics.DrawMesh(_mesh, transform.position, transform.rotation, _lineMaterial, 0, null, 2);
+        foreach (var mesh in _lattice.meshes)
+        {
+            Graphics.DrawMesh(mesh, transform.position, transform.rotation, _surfaceMaterial1, 0, null, 0);
+            Graphics.DrawMesh(mesh, transform.position, transform.rotation, _surfaceMaterial2, 0, null, 1);
+            if (_lineColor.a > 0.0f)
+                Graphics.DrawMesh(mesh, transform.position, transform.rotation, _lineMaterial, 0, null, 2);
+        }
     }
 
     void OnGUI()

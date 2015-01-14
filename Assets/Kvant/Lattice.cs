@@ -26,15 +26,67 @@ namespace Kvant {
 // UV2 - texcoord for normal vector buffer
 //
 
+[System.Serializable]
 public class Lattice
 {
-    static public Mesh Build(int columns, int rows)
+    Mesh[] _meshes;
+
+    public Mesh[] meshes {
+        get { return _meshes; }
+    }
+
+    public Lattice(int columns, int rows)
+    {
+        Build(columns, rows);
+    }
+
+    public void Rebuild(int columns, int rows)
+    {
+        // Destroy all meshes before building new ones.
+        if (_meshes != null)
+            foreach (var m in _meshes) Object.DestroyImmediate(m);
+
+        Build(columns, rows);
+    }
+
+    void Build(int columns, int rows)
+    {
+        // Estimate total count of vertices.
+        var totalVC = columns * rows * 6;
+
+        if (totalVC <= 60000)
+        {
+            // < 60000: It needs just one mesh.
+            _meshes = new Mesh[1] { BuildMesh(columns, rows, 0, rows) };
+        }
+        else
+        {
+            // > 60000: Split into segments.
+            var segments = totalVC / 60000 + 1;
+            _meshes = new Mesh[segments];
+
+            // Have an even number of rows in a segment.
+            var rowsSegment = (rows / segments / 2 + 1) * 2;
+
+            // Build each segments excluding the last one.
+            for (var i = 0; i < segments - 1; i++)
+                _meshes[i] = BuildMesh(columns, rowsSegment, rowsSegment * i, rows);
+
+            // Build the last segment.
+            var last = rowsSegment * (segments - 1);
+            _meshes[segments - 1] = BuildMesh(columns, rows - last, last, rows);
+        }
+    }
+
+    Mesh BuildMesh(int columns, int rows, int startRow, int totalRows)
     {
         var Nx = columns;
         var Ny = rows + 1;
 
         var Sx = 1.0f / Nx;
-        var Sy = 1.0f / Ny;
+        var Sy = 1.0f / (totalRows + 1);
+
+        var Oy = Sy * startRow;
 
         // Texcoord Array for UV1 and UV2.
         var TA1 = new Vector2[Nx * (Ny - 1) * 6];
@@ -48,11 +100,11 @@ public class Lattice
             {
                 var Ix2 = Ix + 0.5f * (Iy & 1);
                 // UVs for position.
-                TA1[iTA + 0] = new Vector2(Sx * (Ix2 + 0.0f), Sy * (Iy + 0));
-                TA1[iTA + 1] = new Vector2(Sx * (Ix2 - 0.5f), Sy * (Iy + 1));
-                TA1[iTA + 2] = new Vector2(Sx * (Ix2 + 0.5f), Sy * (Iy + 1));
+                TA1[iTA + 0] = new Vector2(Sx * (Ix2 + 0.0f), Oy + Sy * (Iy + 0));
+                TA1[iTA + 1] = new Vector2(Sx * (Ix2 - 0.5f), Oy + Sy * (Iy + 1));
+                TA1[iTA + 2] = new Vector2(Sx * (Ix2 + 0.5f), Oy + Sy * (Iy + 1));
                 // UVs for normal vector.
-                TA2[iTA] = TA2[iTA + 1] = TA2[iTA + 2] = new Vector2(Sx * Ix2, Sy * Iy);
+                TA2[iTA] = TA2[iTA + 1] = TA2[iTA + 2] = TA1[iTA];
             }
         }
 
@@ -63,11 +115,11 @@ public class Lattice
             {
                 var Ix2 = Ix + 0.5f * (Iy & 1);
                 // UVs for position.
-                TA1[iTA + 0] = new Vector2(Sx * (Ix2 + 0.0f), Sy * (Iy + 0));
-                TA1[iTA + 1] = new Vector2(Sx * (Ix2 + 0.5f), Sy * (Iy + 1));
-                TA1[iTA + 2] = new Vector2(Sx * (Ix2 + 1.0f), Sy * (Iy + 0));
+                TA1[iTA + 0] = new Vector2(Sx * (Ix2 + 0.0f), Oy + Sy * (Iy + 0));
+                TA1[iTA + 1] = new Vector2(Sx * (Ix2 + 0.5f), Oy + Sy * (Iy + 1));
+                TA1[iTA + 2] = new Vector2(Sx * (Ix2 + 1.0f), Oy + Sy * (Iy + 0));
                 // UVs for normal vector.
-                TA2[iTA] = TA2[iTA + 1] = TA2[iTA + 2] = new Vector2(Sx * Ix2, Sy * Iy);
+                TA2[iTA] = TA2[iTA + 1] = TA2[iTA + 2] = TA1[iTA];
             }
         }
 
@@ -86,14 +138,14 @@ public class Lattice
         var iIA3b = 0;
         for (var Iy = 0; Iy < Ny - 1; Iy++)
         {
-            for (var Ix = 0; Ix < Nx; Ix++, iIA3b += 3)
+            for (var Ix = 0; Ix < Nx; Ix++, iIA3a += 6, iIA3b += 3)
             {
-                IA3[iIA3a++] = iIA3b;
-                IA3[iIA3a++] = iIA3b + 1;
-                IA3[iIA3a++] = iIA3b;
-                IA3[iIA3a++] = iIA3b + 2;
-                IA3[iIA3a++] = iIA3b;
-                IA3[iIA3a++] = iIA3b + IA1.Length + 2;
+                IA3[iIA3a + 0] = iIA3b;
+                IA3[iIA3a + 1] = iIA3b + 1;
+                IA3[iIA3a + 2] = iIA3b;
+                IA3[iIA3a + 3] = iIA3b + 2;
+                IA3[iIA3a + 4] = iIA3b;
+                IA3[iIA3a + 5] = iIA3b + IA1.Length + 2;
             }
         }
 
@@ -109,7 +161,10 @@ public class Lattice
         mesh.Optimize();
 
         // Avoid being culled.
-        mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 10000);
+        mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 100);
+
+        // This only for temporary use. Don't save.
+        mesh.hideFlags = HideFlags.DontSave;
 
         return mesh;
     }

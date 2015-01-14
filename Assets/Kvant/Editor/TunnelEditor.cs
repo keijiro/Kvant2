@@ -14,7 +14,7 @@ public class TunnelEditor : Editor
     SerializedProperty propStacks;
 
     SerializedProperty propOffset;
-    SerializedProperty propRepeat;
+    SerializedProperty propTwist;
 
     SerializedProperty propDensity;
     SerializedProperty propBump;
@@ -33,8 +33,8 @@ public class TunnelEditor : Editor
         propSlices = serializedObject.FindProperty("_slices");
         propStacks = serializedObject.FindProperty("_stacks");
 
-        propOffset = serializedObject.FindProperty("_offset");
-        propRepeat = serializedObject.FindProperty("_repeat");
+        propOffset  = serializedObject.FindProperty("_offset");
+        propTwist   = serializedObject.FindProperty("_twist");
 
         propDensity = serializedObject.FindProperty("_density");
         propBump    = serializedObject.FindProperty("_bump");
@@ -64,7 +64,7 @@ public class TunnelEditor : Editor
         EditorGUILayout.Space();
 
         EditorGUILayout.PropertyField(propOffset);
-        EditorGUILayout.PropertyField(propRepeat);
+        EditorGUILayout.PropertyField(propTwist);
 
         EditorGUILayout.Space();
 
