@@ -7,7 +7,7 @@
         _Velocity   ("-", Vector)   = (0, 0, -10, 0)
         _Noise      ("-", Vector)   = (0.5, 5, 0, 0)
         _Random     ("-", Float)    = 0.5
-        _Life       ("-", Float)    = 3
+        _Life       ("-", Float)    = 2
     }
 
     CGINCLUDE

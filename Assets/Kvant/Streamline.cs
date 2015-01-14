@@ -19,10 +19,10 @@ public class Streamline : MonoBehaviour
     [SerializeField] Color _color = new Color(1, 1, 1, 0.5f);
     [SerializeField] Vector3 _range = Vector3.one * 100;
     [SerializeField] Vector3 _velocity = Vector3.forward * -10;
-    [SerializeField] float _noiseDensity = 0.5f;
+    [SerializeField] float _tail = 1.0f;
     [SerializeField] float _noiseVelocity = 0.0f;
+    [SerializeField] float _noiseDensity = 0.5f;
     [SerializeField] float _random = 0.5f;
-    [SerializeField] float _life = 3;
     [SerializeField] bool _debug;
 
     #endregion
@@ -134,7 +134,6 @@ public class Streamline : MonoBehaviour
 
         // Initialization.
         _deltaMaterial.SetVector("_Range", _range);
-        _deltaMaterial.SetFloat("_Life", _life);
         Graphics.Blit(null, _previousBuffer, _deltaMaterial, 0);
         Graphics.Blit(null, _positionBuffer, _deltaMaterial, 0);
 
@@ -168,7 +167,6 @@ public class Streamline : MonoBehaviour
         _deltaMaterial.SetVector("_Range", _range);
         _deltaMaterial.SetVector("_Velocity", _velocity);
         _deltaMaterial.SetFloat("_Random", _random);
-        _deltaMaterial.SetFloat("_Life", _life);
 
         if (_noiseVelocity > 0)
         {
@@ -183,9 +181,10 @@ public class Streamline : MonoBehaviour
         Graphics.Blit(_previousBuffer, _positionBuffer, _deltaMaterial, 1);
 
         // Draw lines.
-        _lineMaterial.SetColor("_Color", _color);
         _lineMaterial.SetTexture("_PreviousTex", _previousBuffer);
         _lineMaterial.SetTexture("_PositionTex", _positionBuffer);
+        _lineMaterial.SetColor("_Color", _color);
+        _lineMaterial.SetFloat("_Tail", _tail);
         Graphics.DrawMesh(_mesh, transform.position, transform.rotation, _lineMaterial, 0);
     }
 

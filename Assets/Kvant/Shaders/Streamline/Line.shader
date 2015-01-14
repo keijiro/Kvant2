@@ -2,9 +2,10 @@
 {
     Properties
     {
-        _PreviousTex("-", 2D) = ""{}
         _PositionTex("-", 2D) = ""{}
-        _Color("Color", Color) = (1, 1, 1, 0.5)
+        _PreviousTex("-", 2D) = ""{}
+        _Color("-", Color) = (1, 1, 1, 0.5)
+        _Tail("_", Float) = 1
     }
 
     CGINCLUDE
@@ -23,10 +24,11 @@
         float4 color : COLOR;
     };
 
-    sampler2D _PreviousTex;
     sampler2D _PositionTex;
+    sampler2D _PreviousTex;
 
     half4 _Color;
+    float _Tail;
 
     v2f vert(appdata v)
     {
@@ -34,22 +36,22 @@
 
         float2 uv = v.texcoord.xy;
 
-        float4 p1 = tex2D(_PreviousTex, uv);
-        float4 p2 = tex2D(_PositionTex, uv);
+        float4 p1 = tex2D(_PositionTex, uv);
+        float4 p2 = tex2D(_PreviousTex, uv);
         float sw = v.position.x;
 
-        if (p1.w < 0)
+        if (p2.w < 0)
         {
-            o.position = mul(UNITY_MATRIX_MVP, float4(p2.xyz, 1));
+            o.position = mul(UNITY_MATRIX_MVP, float4(p1.xyz, 1));
         }
         else
         {
-            float3 p = lerp(p1.xyz, p2.xyz, sw);
+            float3 p = lerp(p1.xyz, p2.xyz, sw * _Tail);
             o.position = mul(UNITY_MATRIX_MVP, float4(p, 1));
         }
 
         o.color = _Color;
-        o.color.a *= sw;
+        o.color.a *= (1.0 - sw);
 
         return o;
     }
