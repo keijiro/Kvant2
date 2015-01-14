@@ -1,4 +1,4 @@
-﻿Shader "Hidden/Kvant/Tunnel"
+﻿Shader "Hidden/Kvant/Tunnel/GPGPU"
 {
     Properties
     {
