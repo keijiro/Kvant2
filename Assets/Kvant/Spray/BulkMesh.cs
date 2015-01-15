@@ -5,22 +5,30 @@ namespace Kvant {
 
 public partial class Spray
 {
+    //
+    // Bulk mesh class
+    //
+    // Duplicate and combine the given meshes to a single mesh.
+    // It duplicate the meshes as many as possible, but it will be limited by
+    // the number of vertices (<64k) and copies (<4k).
+    //
     [System.Serializable]
     class BulkMesh
     {
-        Mesh[] _meshes;
+        // Single combined mesh.
+        Mesh _mesh;
 
-        public Mesh[] meshes { get { return _meshes; } }
+        public Mesh mesh { get { return _mesh; } }
 
         public BulkMesh(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
         {
-            BuildMeshes(maxParticles, shapes, bufferWidth, bufferHeight);
+            BuildInternal(maxParticles, shapes, bufferWidth, bufferHeight);
         }
 
         public void Rebuild(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
         {
-            foreach (var m in _meshes) DestroyImmediate(m);
-            BuildMeshes(maxParticles, shapes, bufferWidth, bufferHeight);
+            DestroyImmediate(_mesh);
+            BuildInternal(maxParticles, shapes, bufferWidth, bufferHeight);
         }
 
         #region Private Methods
@@ -69,7 +77,7 @@ public partial class Spray
         }
 
         // Mesh builder functoin.
-        void BuildMeshes(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
+        void BuildInternal(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
         {
             // Store the meshes into the shape cache.
             var cache = new ShapeCacheData[shapes.Length];
@@ -84,9 +92,9 @@ public partial class Spray
                 ic_shapes += s.IndexCount;
             }
 
-            // If there is nothing, make a null array.
+            // If there is nothing, make a null mesh.
             if (vc_shapes == 0) {
-                _meshes = new Mesh[0];
+                _mesh = new Mesh();
                 return;
             }
 
@@ -122,22 +130,20 @@ public partial class Spray
             }
 
             // Create a mesh object.
-            var mesh = new Mesh();
+            _mesh = new Mesh();
 
-            mesh.vertices = va;
-            mesh.normals = na;
-            mesh.uv = ta;
+            _mesh.vertices = va;
+            _mesh.normals = na;
+            _mesh.uv = ta;
 
-            mesh.SetIndices(ia, MeshTopology.Triangles, 0);
-            mesh.Optimize();
+            _mesh.SetIndices(ia, MeshTopology.Triangles, 0);
+            _mesh.Optimize();
 
             // This only for temporary use. Don't save.
-            mesh.hideFlags = HideFlags.DontSave;
+            _mesh.hideFlags = HideFlags.DontSave;
 
             // Avoid being culled.
-            mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 100);
-
-            _meshes = new Mesh[1] { mesh };
+            _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 100);
         }
 
         #endregion

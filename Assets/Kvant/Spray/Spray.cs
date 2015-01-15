@@ -165,8 +165,7 @@ public partial class Spray : MonoBehaviour
         _surfaceMaterial.SetTexture("_RotationTex", _rotationBuffer2);
         _surfaceMaterial.SetColor("_Color", _color);
 
-        foreach (var m in _bulkMesh.meshes)
-            Graphics.DrawMesh(m, transform.position, transform.rotation, _surfaceMaterial, 0);
+        Graphics.DrawMesh(_bulkMesh.mesh, transform.position, transform.rotation, _surfaceMaterial, 0);
     }
 
     void OnGUI()
