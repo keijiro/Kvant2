@@ -5,23 +5,40 @@ namespace Kvant {
 
 public partial class Spray
 {
+    //
+    // Bulk mesh storage class
+    //
+    // Makes a given number of copies of the shapes,
+    // and combine them into the minimum number of meshes.
+    //
     [System.Serializable]
     class BulkMesh
     {
-        Mesh[] _meshes;
+        // Combined meshes.
+        Mesh[] _segments = new Mesh[0];
 
-        public Mesh[] meshes { get { return _meshes; } }
+        #region Public Properties And Methods
 
-        public BulkMesh(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
+        public Mesh[] segments { get { return _segments; } }
+
+        public BulkMesh(Mesh[] shapes, int duplicate, Texture buffer)
         {
-            BuildMeshes(maxParticles, shapes, bufferWidth, bufferHeight);
+            BuildInternal(shapes, duplicate, buffer);
         }
 
-        public void Rebuild(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
+        public void Rebuild(Mesh[] shapes, int duplicate, Texture buffer)
         {
-            foreach (var m in _meshes) DestroyImmediate(m);
-            BuildMeshes(maxParticles, shapes, bufferWidth, bufferHeight);
+            Release();
+            BuildInternal(shapes, duplicate, buffer);
         }
+
+        public void Release()
+        {
+            foreach (var m in _segments) DestroyImmediate(m);
+            _segments = new Mesh[0];
+        }
+
+        #endregion
 
         #region Private Methods
 
@@ -69,7 +86,7 @@ public partial class Spray
         }
 
         // Mesh builder functoin.
-        void BuildMeshes(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
+        void BuildInternal(Mesh[] shapes, int duplicate, Texture buffer)
         {
             // Store the meshes into the shape cache.
             var cache = new ShapeCacheData[shapes.Length];
@@ -85,41 +102,81 @@ public partial class Spray
             }
 
             // If there is nothing, make a null array.
-            if (vc_shapes == 0) {
-                _meshes = new Mesh[0];
-                return;
-            }
+            if (vc_shapes == 0) return;
 
-            // Create vertex arrays.
-            var rep = maxParticles / shapes.Length + 1;
+            var shape_set_per_segment = 65000 / vc_shapes;
+            var segment_count = duplicate / set_per_mesh + 1;
+                // Create vertex arrays.
+                var vc = vc_shapes * shape_set_per_segment;
+                var ic = ic_shapes * shape_set_per_segment;
 
-            var vc = vc_shapes * rep;
-            var ic = ic_shapes * rep;
+                var va = new Vector3[vc];
+                var na = new Vector3[vc];
+                var ta = new Vector2[vc];
+                var ia = new int[ic];
 
-            var va = new Vector3[vc];
-            var na = new Vector3[vc];
-            var ta = new Vector2[vc];
-            var ia = new int[ic];
+                for (int va_i = 0, ia_i = 0, e_i = 0; va_i < vc; e_i++)
+                {
+                    var s = cache[e_i % shapes.Length];
 
-            for (int va_i = 0, ia_i = 0, e_i = 0; va_i < vc; e_i++)
+                    s.CopyVerticesTo(va, va_i);
+                    s.CopyNormalsTo(na, va_i);
+                    s.CopyIndicesTo(ia, ia_i, va_i);
+
+                    var uv = new Vector2(
+                            (float)(e_i % buffer.width) / buffer.width,
+                            (float)(e_i / buffer.width) / buffer.height
+                            );
+
+                    for (var i = 0; i < s.VertexCount; i++) ta[va_i + i] = uv;
+
+                    va_i += s.VertexCount;
+                    ia_i += s.IndexCount;
+                }
+
+
+
+
+
+
+
+
+            _segments = new Mesh[segment_count];
+
+            for (var segment_i = 0; segment_i < segment_count; segment_i++)
             {
-                var s = cache[e_i % shapes.Length];
+                // Create vertex arrays.
+                var vc = vc_shapes * shape_set_per_segment;
+                var ic = ic_shapes * shape_set_per_segment;
 
-                var uv = new Vector2(
-                    (float)(e_i % bufferWidth) / bufferWidth,
-                    (float)(e_i / bufferWidth) / bufferHeight
-                );
+                var va = new Vector3[vc];
+                var na = new Vector3[vc];
+                var ta = new Vector2[vc];
+                var ia = new int[ic];
 
-                s.CopyVerticesTo(va, va_i);
-                s.CopyNormalsTo(na, va_i);
-                s.CopyIndicesTo(ia, ia_i, va_i);
+                for (int va_i = 0, ia_i = 0, e_i = 0; va_i < vc; e_i++)
+                {
+                    var s = cache[e_i % shapes.Length];
 
-                for (var i = 0; i < s.VertexCount; i++)
-                    ta[va_i + i] = uv;
+                    s.CopyVerticesTo(va, va_i);
+                    s.CopyNormalsTo(na, va_i);
+                    s.CopyIndicesTo(ia, ia_i, va_i);
 
-                va_i += s.VertexCount;
-                ia_i += s.IndexCount;
+                    var uv = new Vector2(
+                            (float)(e_i % buffer.width) / buffer.width,
+                            (float)(e_i / buffer.width) / buffer.height
+                            );
+
+                    for (var i = 0; i < s.VertexCount; i++) ta[va_i + i] = uv;
+
+                    va_i += s.VertexCount;
+                    ia_i += s.IndexCount;
+                }
             }
+
+
+
+
 
             // Create a mesh object.
             var mesh = new Mesh();
@@ -137,7 +194,7 @@ public partial class Spray
             // Avoid being culled.
             mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 100);
 
-            _meshes = new Mesh[1] { mesh };
+            _segments = new Mesh[1] { mesh };
         }
 
         #endregion

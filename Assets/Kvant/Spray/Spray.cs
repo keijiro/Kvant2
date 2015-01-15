@@ -123,9 +123,9 @@ public partial class Spray : MonoBehaviour
 
         // Mesh object.
         if (_bulkMesh == null)
-            _bulkMesh = new BulkMesh(_maxParticles, _shapes, _positionBuffer1.width, _positionBuffer1.height);
+            _bulkMesh = new BulkMesh(_shapes, _maxParticles, _positionBuffer1);
         else
-            _bulkMesh.Rebuild(_maxParticles, _shapes, _positionBuffer1.width, _positionBuffer1.height);
+            _bulkMesh.Rebuild(_shapes, _maxParticles, _positionBuffer1);
 
         _needsReset = false;
     }
@@ -137,6 +137,11 @@ public partial class Spray : MonoBehaviour
     void Reset()
     {
         _needsReset = true;
+    }
+
+    void OnDestroy()
+    {
+        _bulkMesh.Release();
     }
 
     void Update()
@@ -165,7 +170,7 @@ public partial class Spray : MonoBehaviour
         _surfaceMaterial.SetTexture("_RotationTex", _rotationBuffer2);
         _surfaceMaterial.SetColor("_Color", _color);
 
-        foreach (var m in _bulkMesh.meshes)
+        foreach (var m in _bulkMesh.segments)
             Graphics.DrawMesh(m, transform.position, transform.rotation, _surfaceMaterial, 0);
     }
 
