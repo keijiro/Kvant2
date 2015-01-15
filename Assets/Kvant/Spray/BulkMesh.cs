@@ -15,25 +15,45 @@ public partial class Spray
     [System.Serializable]
     class BulkMesh
     {
+        #region Properties
+
         // Single combined mesh.
         Mesh _mesh;
-
         public Mesh mesh { get { return _mesh; } }
 
-        public BulkMesh(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
+        // Copy count.
+        int _copies;
+        public int copies { get { return _copies; } }
+
+        #endregion
+
+        #region Public Methods
+
+        public BulkMesh(Mesh[] shapes)
         {
-            BuildInternal(maxParticles, shapes, bufferWidth, bufferHeight);
+            CombineMeshes(shapes);
         }
 
-        public void Rebuild(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
+        public void Rebuild(Mesh[] shapes)
         {
-            DestroyImmediate(_mesh);
-            BuildInternal(maxParticles, shapes, bufferWidth, bufferHeight);
+            Release();
+            CombineMeshes(shapes);
         }
+
+        public void Release()
+        {
+            if (_mesh)
+            {
+                DestroyImmediate(_mesh);
+                _copies = 0;
+            }
+        }
+
+        #endregion
 
         #region Private Methods
 
-        // Cache structure to store shape information.
+        // Cache structure to store the shape information.
         struct ShapeCacheData
         {
             Vector3[] vertices;
@@ -76,8 +96,8 @@ public partial class Spray
             }
         }
 
-        // Mesh builder functoin.
-        void BuildInternal(int maxParticles, Mesh[] shapes, int bufferWidth, int bufferHeight)
+        // Mesh combiner functoin.
+        void CombineMeshes(Mesh[] shapes)
         {
             // Store the meshes into the shape cache.
             var cache = new ShapeCacheData[shapes.Length];
@@ -92,17 +112,14 @@ public partial class Spray
                 ic_shapes += s.IndexCount;
             }
 
-            // If there is nothing, make a null mesh.
-            if (vc_shapes == 0) {
-                _mesh = new Mesh();
-                return;
-            }
+            // If there is nothing, break.
+            if (vc_shapes == 0) return;
 
             // Create vertex arrays.
-            var rep = maxParticles / shapes.Length + 1;
+            _copies = Mathf.Min(65536 / vc_shapes, 4096);
 
-            var vc = vc_shapes * rep;
-            var ic = ic_shapes * rep;
+            var vc = vc_shapes * _copies;
+            var ic = ic_shapes * _copies;
 
             var va = new Vector3[vc];
             var na = new Vector3[vc];
@@ -113,10 +130,7 @@ public partial class Spray
             {
                 var s = cache[e_i % shapes.Length];
 
-                var uv = new Vector2(
-                    (float)(e_i % bufferWidth) / bufferWidth,
-                    (float)(e_i / bufferWidth) / bufferHeight
-                );
+                var uv = new Vector2((float)e_i / _copies, 0);
 
                 s.CopyVerticesTo(va, va_i);
                 s.CopyNormalsTo(na, va_i);

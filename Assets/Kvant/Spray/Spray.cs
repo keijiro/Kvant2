@@ -7,12 +7,6 @@ namespace Kvant {
 [AddComponentMenu("Kvant/Spray")]
 public partial class Spray : MonoBehaviour
 {
-    #region Private Settings
-
-    const int bufferWidth = 512;
-
-    #endregion
-
     #region Parameters Exposed To Editor
 
     [SerializeField] Mesh[] _shapes;
@@ -71,6 +65,7 @@ public partial class Spray : MonoBehaviour
 
     RenderTexture CreateBuffer()
     {
+        var bufferWidth = _bulkMesh.copies;
         var bufferHeight = _maxParticles / bufferWidth + 1;
         var buffer = new RenderTexture(bufferWidth, bufferHeight, 0, RenderTextureFormat.ARGBFloat);
         buffer.hideFlags = HideFlags.DontSave;
@@ -100,6 +95,12 @@ public partial class Spray : MonoBehaviour
 
     void ResetResources()
     {
+        // Mesh object.
+        if (_bulkMesh == null)
+            _bulkMesh = new BulkMesh(_shapes);
+        else
+            _bulkMesh.Rebuild(_shapes);
+
         // GPGPU buffers.
         if (_positionBuffer1) DestroyImmediate(_positionBuffer1);
         if (_positionBuffer2) DestroyImmediate(_positionBuffer2);
@@ -120,12 +121,6 @@ public partial class Spray : MonoBehaviour
         ApplyKernelParameters();
         Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 1);
         Graphics.Blit(null, _rotationBuffer2, _kernelMaterial, 0);
-
-        // Mesh object.
-        if (_bulkMesh == null)
-            _bulkMesh = new BulkMesh(_maxParticles, _shapes, _positionBuffer1.width, _positionBuffer1.height);
-        else
-            _bulkMesh.Rebuild(_maxParticles, _shapes, _positionBuffer1.width, _positionBuffer1.height);
 
         _needsReset = false;
     }
@@ -165,7 +160,13 @@ public partial class Spray : MonoBehaviour
         _surfaceMaterial.SetTexture("_RotationTex", _rotationBuffer2);
         _surfaceMaterial.SetColor("_Color", _color);
 
-        Graphics.DrawMesh(_bulkMesh.mesh, transform.position, transform.rotation, _surfaceMaterial, 0);
+        var block = new MaterialPropertyBlock();
+
+        for (var i = 0; i < _positionBuffer2.height; i++)
+        {
+            block.AddFloat("_BufferOffset", (float)i / _positionBuffer2.height);
+            Graphics.DrawMesh(_bulkMesh.mesh, transform.position, transform.rotation, _surfaceMaterial, 0, null, 0, block);
+        }
     }
 
     void OnGUI()

@@ -5,6 +5,7 @@
         _PositionTex("-", 2D) = ""{}
         _RotationTex("-", 2D) = ""{}
         _Color("-", Color) = (1, 1, 1, 0.5)
+        _BufferOffset("-", float) = 0
     }
     SubShader
     {
@@ -17,6 +18,7 @@
 
         sampler2D _PositionTex;
         sampler2D _PreviousTex;
+        float _BufferOffset;
 
         float4 _Color;
 
@@ -28,6 +30,7 @@
         void vert(inout appdata_full v)
         {
             float2 uv = v.texcoord;
+            uv.y += _BufferOffset;
             v.vertex.xyz += tex2D(_PositionTex, uv).xyz;
         }
 
