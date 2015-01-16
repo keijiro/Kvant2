@@ -38,6 +38,20 @@
         return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
     }
 
+    // Uniform random unit quaternion.
+    // http://tog.acm.org/resources/GraphicsGems/gemsiii/urot.c
+    float4 random_quaternion(float2 uv)
+    {
+        float r = nrand(uv);
+        float r1 = sqrt(1.0 - r);
+        float r2 = sqrt(r);
+
+        float t1 = PI2 * nrand(uv + float2(1, 0));
+        float t2 = PI2 * nrand(uv + float2(0, 1));
+
+        return float4(sin(t1) * r1, cos(t1) * r1, sin(t2) * r2, cos(t2) * r2);
+    }
+
     // Get a new particle.
     float4 new_particle_position(float2 uv)
     {
@@ -58,16 +72,7 @@
 
     float4 new_particle_rotation(float2 uv)
     {
-        uv += float2(_Time.x, 84.737);
-
-        float u1 = nrand(uv);
-        float u1a = sqrt(1.0 - u1);
-        float u1b = sqrt(u1);
-
-        float u2 = nrand(uv + float2(1, 0)) * PI2;
-        float u3 = nrand(uv + float2(0, 1)) * PI2;
-
-        return float4(u1a * sin(u2), u1a * cos(u2), u1b * sin(u3), u1b * cos(u3));
+        return random_quaternion(uv + float2(_Time.x, 84.737));
     }
 
     // Position dependant noise function.
@@ -101,7 +106,7 @@
         float4 p = tex2D(_MainTex, i.uv);
         if (p.w > 0)
         {
-            p.xyz += (_Velocity * r + position_noise(p.xyz, 0)) * d;
+            p.xyz += (_Velocity * r + position_noise(p.xyz * 0.3 + _Time.y, 0) * 8) * d;
             p.w -= d;
             return p;
         }
@@ -111,10 +116,31 @@
         }
     }
 
+        float4 qmul(float4 q1, float4 q2)
+        {
+            return float4(
+                q1.w * q2.xyz + q2.w * q1.xyz + cross(q1.xyz, q2.xyz),
+                q1.w * q2.w - dot(q1.xyz, q2.xyz)
+            );
+        }
+
     // Kernel 3 - update rotation.
     float4 frag_update_rotation(v2f_img i) : SV_Target 
     {
-        return tex2D(_MainTex, i.uv);
+        float d = unity_DeltaTime.x;
+        float4 r = tex2D(_MainTex, i.uv);
+
+        float uv = i.uv + float2(0, 31.3824);
+
+        float x1 = nrand(uv);
+        float x2 = nrand(uv + float2(1, 0));
+        float x3 = nrand(uv + float2(0, 1));
+
+        float3 v = normalize(float3(x1, x2, x3) - float3(0.5));
+
+        r = qmul(r, float4(v * sin(1.8 * d), cos(1.8 * d)));
+
+        return r;
     }
 
     ENDCG

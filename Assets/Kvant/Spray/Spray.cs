@@ -65,9 +65,9 @@ public partial class Spray : MonoBehaviour
 
     RenderTexture CreateBuffer()
     {
-        var bufferWidth = _bulkMesh.copies;
-        var bufferHeight = _maxParticles / bufferWidth + 1;
-        var buffer = new RenderTexture(bufferWidth, bufferHeight, 0, RenderTextureFormat.ARGBFloat);
+        var width = _bulkMesh.copies;
+        var height = _maxParticles / width + 1;
+        var buffer = new RenderTexture(width, height, 0, RenderTextureFormat.ARGBFloat);
         buffer.hideFlags = HideFlags.DontSave;
         buffer.filterMode = FilterMode.Point;
         buffer.wrapMode = TextureWrapMode.Repeat;
@@ -119,8 +119,8 @@ public partial class Spray : MonoBehaviour
 
         // Initialization.
         ApplyKernelParameters();
-        Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 1);
-        Graphics.Blit(null, _rotationBuffer2, _kernelMaterial, 0);
+        Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
+        Graphics.Blit(null, _rotationBuffer2, _kernelMaterial, 1);
 
         _needsReset = false;
     }
