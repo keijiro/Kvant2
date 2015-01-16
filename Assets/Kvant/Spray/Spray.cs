@@ -173,9 +173,8 @@ public partial class Spray : MonoBehaviour
     {
         if (_debug && Event.current.type.Equals(EventType.Repaint) && _debugMaterial)
         {
-            var w = 64;
-            var r1 = new Rect(0 * w, 0, w, w);
-            var r2 = new Rect(1 * w, 0, w, w);
+            var r1 = new Rect(0, 0, 256, 64);
+            var r2 = new Rect(0, 64, 256, 64);
             if (_positionBuffer1) Graphics.DrawTexture(r1, _positionBuffer1, _debugMaterial);
             if (_rotationBuffer1) Graphics.DrawTexture(r2, _rotationBuffer2, _debugMaterial);
         }
