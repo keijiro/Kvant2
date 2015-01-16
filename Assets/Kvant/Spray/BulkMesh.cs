@@ -22,8 +22,8 @@ public partial class Spray
         public Mesh mesh { get { return _mesh; } }
 
         // Copy count.
-        int _copies;
-        public int copies { get { return _copies; } }
+        int _copyCount;
+        public int copyCount { get { return _copyCount; } }
 
         #endregion
 
@@ -45,7 +45,7 @@ public partial class Spray
             if (_mesh)
             {
                 DestroyImmediate(_mesh);
-                _copies = 0;
+                _copyCount = 0;
             }
         }
 
@@ -115,12 +115,20 @@ public partial class Spray
             // If there is nothing, break.
             if (vc_shapes == 0) return;
 
+            // Determine the number of copies.
+            // - The number of vertices must be less than 64k.
+            // - The number of copies must be less than 4096.
+            var vc = 0;
+            var ic = 0;
+            for (_copyCount = 0; _copyCount < 4096; _copyCount++)
+            {
+                var s = cache[_copyCount % shapes.Length];
+                if (vc + s.VertexCount > 65536) break;
+                vc += s.VertexCount;
+                ic += s.IndexCount;
+            }
+
             // Create vertex arrays.
-            _copies = Mathf.Min(65536 / vc_shapes, 4096);
-
-            var vc = vc_shapes * _copies;
-            var ic = ic_shapes * _copies;
-
             var va = new Vector3[vc];
             var na = new Vector3[vc];
             var ta = new Vector2[vc];
@@ -130,14 +138,12 @@ public partial class Spray
             {
                 var s = cache[e_i % shapes.Length];
 
-                var uv = new Vector2((float)e_i / _copies, 0);
-
                 s.CopyVerticesTo(va, va_i);
                 s.CopyNormalsTo(na, va_i);
                 s.CopyIndicesTo(ia, ia_i, va_i);
 
-                for (var i = 0; i < s.VertexCount; i++)
-                    ta[va_i + i] = uv;
+                var uv = new Vector2((float)e_i / _copyCount, 0);
+                for (var i = 0; i < s.VertexCount; i++) ta[va_i + i] = uv;
 
                 va_i += s.VertexCount;
                 ia_i += s.IndexCount;

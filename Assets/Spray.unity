@@ -316,7 +316,11 @@ MonoBehaviour:
   - {fileID: 4300000, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
   - {fileID: 4300012, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
   - {fileID: 4300010, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  _maxParticles: 10000
+  - {fileID: 4300008, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
+  - {fileID: 4300006, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
+  - {fileID: 4300002, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
+  - {fileID: 4300004, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
+  _maxParticles: 30000
   _emitterPosition: {x: 0, y: 0, z: 0}
   _emitterSize: {x: 30, y: 30, z: 5}
   _life: 5

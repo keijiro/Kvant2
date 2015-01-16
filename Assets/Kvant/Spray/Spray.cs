@@ -65,7 +65,7 @@ public partial class Spray : MonoBehaviour
 
     RenderTexture CreateBuffer()
     {
-        var width = _bulkMesh.copies;
+        var width = _bulkMesh.copyCount;
         var height = _maxParticles / width + 1;
         var buffer = new RenderTexture(width, height, 0, RenderTextureFormat.ARGBFloat);
         buffer.hideFlags = HideFlags.DontSave;
