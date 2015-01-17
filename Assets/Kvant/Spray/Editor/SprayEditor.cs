@@ -100,10 +100,7 @@ public class SprayEditor : Editor
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(propMaxParticles);
         EditorGUILayout.HelpBox("Actual Number: " + targetSpray.maxParticles, MessageType.None);
-        EditorGUILayout.PropertyField(propShapes, true);
-        if (EditorGUI.EndChangeCheck()) 
-            targetSpray.NotifyConfigChanged();
-
+        if (EditorGUI.EndChangeCheck()) targetSpray.NotifyConfigChanged();
 
         EditorGUILayout.Space();
 
@@ -116,11 +113,6 @@ public class SprayEditor : Editor
 
         EditorGUILayout.LabelField("Life");
         MinMaxSlider(propMinLife, propMaxLife, 0.1f, 5.0f);
-
-        EditorGUILayout.Space();
-
-        EditorGUILayout.LabelField("Scale");
-        MinMaxSlider(propMinScale, propMaxScale, 0.01f, 5.0f);
 
         EditorGUILayout.Space();
 
@@ -143,9 +135,21 @@ public class SprayEditor : Editor
 
         EditorGUILayout.Space();
 
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(propShapes, true);
+        if (EditorGUI.EndChangeCheck()) targetSpray.NotifyConfigChanged();
+
+        EditorGUILayout.Space();
+
+        EditorGUILayout.LabelField("Scale");
+        MinMaxSlider(propMinScale, propMaxScale, 0.01f, 5.0f);
+
+        EditorGUILayout.Space();
+
         EditorGUILayout.PropertyField(propColor);
 
         EditorGUILayout.Space();
+
 
         EditorGUILayout.PropertyField(propRandomSeed);
         EditorGUILayout.PropertyField(propDebug);
