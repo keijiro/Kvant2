@@ -312,22 +312,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _shapes:
-  - {fileID: 4300014, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  - {fileID: 4300000, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  - {fileID: 4300012, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  - {fileID: 4300010, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  - {fileID: 4300008, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  - {fileID: 4300006, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  - {fileID: 4300002, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  - {fileID: 4300004, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  _maxParticles: 10000
+  - {fileID: 4300034, guid: e1d194b60c7a84350b782cd7d7870584, type: 3}
+  - {fileID: 4300032, guid: e1d194b60c7a84350b782cd7d7870584, type: 3}
+  _maxParticles: 20000
   _emitterPosition: {x: 0, y: 0, z: 5}
   _emitterSize: {x: 30, y: 30, z: 15}
   _throttle: 1
   _minLife: 1.38024211
   _maxLife: 2.83515477
   _minScale: .0880469084
-  _maxScale: .959155619
+  _maxScale: .517562687
   _direction: {x: 0, y: 0, z: -1}
   _spread: .128000006
   _minSpeed: 3.90625
