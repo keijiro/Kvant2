@@ -124,7 +124,7 @@ public partial class Spray
             for (_copyCount = 0; _copyCount < 4096; _copyCount++)
             {
                 var s = cache[_copyCount % shapes.Length];
-                if (vc + s.VertexCount > 65536) break;
+                if (vc + s.VertexCount > 65535) break;
                 vc += s.VertexCount;
                 ic += s.IndexCount;
             }
