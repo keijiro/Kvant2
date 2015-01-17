@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿//
+// Spray - mesh based particle system.
+//
+
+using UnityEngine;
 using System.Collections;
 
 namespace Kvant {
@@ -14,6 +18,7 @@ public partial class Spray : MonoBehaviour
 
     [SerializeField] Vector3 _emitterPosition = Vector3.zero;
     [SerializeField] Vector3 _emitterSize = Vector3.one;
+    [SerializeField] float _throttle = 1.0f;
 
     [SerializeField] float _minLife = 1.0f;
     [SerializeField] float _maxLife = 4.0f;
@@ -32,10 +37,95 @@ public partial class Spray : MonoBehaviour
 
     [SerializeField] float _noiseDensity = 0.2f;
     [SerializeField] float _noiseVelocity = 5.0f;
+    [SerializeField] float _noiseAnimation = 1.0f;
 
     [SerializeField] Color _color = Color.white;
     [SerializeField] int _randomSeed = 0;
     [SerializeField] bool _debug;
+
+    #endregion
+
+    #region Public Properties
+
+    // Returns the actual number of particles.
+    public int maxParticles {
+        get {
+            if (_bulkMesh == null) return 0;
+            return (_maxParticles / _bulkMesh.copyCount + 1) * _bulkMesh.copyCount;
+        }
+    }
+
+    public float throttle {
+        get { return _throttle; }
+        set { _throttle = value; }
+    }
+
+    public Vector3 emitterPosition {
+        get { return _emitterPosition; }
+        set { _emitterPosition = value; }
+    }
+    public Vector3 emitterSize {
+        get { return _emitterSize; }
+        set { _emitterSize = value; }
+    }
+
+    public float minLife {
+        get { return _minLife; }
+        set { _minLife = value; }
+    }
+    public float maxLife {
+        get { return _maxLife; }
+        set { _maxLife = value; }
+    }
+
+    public float minScale {
+        get { return _minScale; }
+        set { _minScale = value; }
+    }
+    public float maxScale {
+        get { return _maxScale; }
+        set { _maxScale = value; }
+    }
+
+    public Vector3 direction {
+        get { return _direction; }
+        set { _direction = value; }
+    }
+    public float spread {
+        get { return _spread; }
+        set { _spread = value; }
+    }
+
+    public float minSpeed {
+        get { return _minSpeed; }
+        set { _minSpeed = value; }
+    }
+    public float maxSpeed {
+        get { return _maxSpeed; }
+        set { _maxSpeed = value; }
+    }
+
+    public float minRotation {
+        get { return _minRotation; }
+        set { _minRotation = value; }
+    }
+    public float maxRotation {
+        get { return _maxRotation; }
+        set { _maxRotation = value; }
+    }
+
+    public float noiseDensity {
+        get { return _noiseDensity; }
+        set { _noiseDensity = value; }
+    }
+    public float noiseVelocity {
+        get { return _noiseVelocity; }
+        set { _noiseVelocity = value; }
+    }
+    public float noiseAnimation {
+        get { return _noiseAnimation; }
+        set { _noiseAnimation = value; }
+    }
 
     #endregion
 
@@ -74,6 +164,13 @@ public partial class Spray : MonoBehaviour
         _needsReset = true;
     }
 
+    Material CreateMaterial(Shader shader)
+    {
+        var material = new Material(shader);
+        material.hideFlags = HideFlags.DontSave;
+        return material;
+    }
+
     RenderTexture CreateBuffer()
     {
         var width = _bulkMesh.copyCount;
@@ -85,32 +182,25 @@ public partial class Spray : MonoBehaviour
         return buffer;
     }
 
-    Material CreateMaterial(Shader shader)
-    {
-        var material = new Material(shader);
-        material.hideFlags = HideFlags.DontSave;
-        return material;
-    }
-
     void ApplyKernelParameters()
     {
         _kernelMaterial.SetVector("_EmitterPos", _emitterPosition);
         _kernelMaterial.SetVector("_EmitterSize", _emitterSize);
 
-        var lp = new Vector2(1.0f / _minLife, 1.0f / _maxLife);
-        _kernelMaterial.SetVector("_LifeParams", lp);
+        _kernelMaterial.SetVector("_LifeParams", new Vector2(1.0f / _minLife, 1.0f / _maxLife));
 
         var dir = new Vector4(_direction.x, _direction.y, _direction.z, _spread);
         _kernelMaterial.SetVector("_Direction", dir);
 
-        var rs = Mathf.PI / 360;
-        var sp = new Vector4(_minSpeed, _maxSpeed, _minRotation * rs, _maxRotation * rs);
-        _kernelMaterial.SetVector("_SpeedParams", sp);
+        var pi360 = Mathf.PI / 360;
+        var sparams = new Vector4(_minSpeed, _maxSpeed, _minRotation * pi360, _maxRotation * pi360);
+        _kernelMaterial.SetVector("_SpeedParams", sparams);
 
-        var np = new Vector2(_noiseDensity, _noiseVelocity);
+        var np = new Vector3(_noiseDensity, _noiseVelocity, _noiseAnimation);
         _kernelMaterial.SetVector("_NoiseParams", np);
 
-        _kernelMaterial.SetFloat("_RandomSeed", _randomSeed);
+        var delta = Application.isPlaying ? Time.deltaTime : 1.0f;
+        _kernelMaterial.SetVector("_Config", new Vector3(_throttle, _randomSeed, delta));
     }
 
     void ResetResources()
@@ -158,35 +248,45 @@ public partial class Spray : MonoBehaviour
     {
         if (_needsReset) ResetResources();
 
-        // Swap the buffers.
-        {
-            var temp = _positionBuffer1;
-            _positionBuffer1 = _positionBuffer2;
-            _positionBuffer2 = temp;
+        ApplyKernelParameters();
 
-            temp = _rotationBuffer1;
-            _rotationBuffer1 = _rotationBuffer2;
-            _rotationBuffer2 = temp;
+        if (Application.isPlaying)
+        {
+            // Swap the buffers.
+            {
+                var temp = _positionBuffer1;
+                _positionBuffer1 = _positionBuffer2;
+                _positionBuffer2 = temp;
+
+                temp = _rotationBuffer1;
+                _rotationBuffer1 = _rotationBuffer2;
+                _rotationBuffer2 = temp;
+            }
+        }
+        else
+        {
+            // Editor: initialize the buffer on every update.
+            Graphics.Blit(null, _positionBuffer1, _kernelMaterial, 0);
+            Graphics.Blit(null, _rotationBuffer1, _kernelMaterial, 1);
         }
 
         // Apply the kernel shaders.
-        ApplyKernelParameters();
         Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 2);
         Graphics.Blit(_rotationBuffer1, _rotationBuffer2, _kernelMaterial, 3);
 
         // Draw the bulk mesh.
-        var offset = new MaterialPropertyBlock();
-
         _surfaceMaterial.SetTexture("_PositionTex", _positionBuffer2);
         _surfaceMaterial.SetTexture("_RotationTex", _rotationBuffer2);
         _surfaceMaterial.SetColor("_Color", _color);
         _surfaceMaterial.SetVector("_ScaleParams", new Vector2(_minScale, _maxScale));
 
+        var uv = new Vector2(0.5f / _positionBuffer2.width, 0);
+        var offset = new MaterialPropertyBlock();
+
         for (var i = 0; i < _positionBuffer2.height; i++)
         {
-            var ox = 0.5f / _positionBuffer2.width;
-            var oy = (0.5f + i) / _positionBuffer2.height;
-            offset.AddVector("_BufferOffset", new Vector2(ox, oy));
+            uv.y = (0.5f + i) / _positionBuffer2.height;
+            offset.AddVector("_BufferOffset", uv);
             Graphics.DrawMesh(_bulkMesh.mesh, transform.position, transform.rotation, _surfaceMaterial, 0, null, 0, offset);
         }
     }

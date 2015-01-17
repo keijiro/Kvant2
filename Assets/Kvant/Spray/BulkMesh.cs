@@ -1,3 +1,11 @@
+//
+// Bulk mesh class
+//
+// Duplicate and combine the given meshes into a single mesh.
+// It duplicate the meshes as many as possible, but limited by
+// the number of vertices (<64k) and copies (<4k).
+//
+
 using UnityEngine;
 using System.Collections;
 
@@ -5,13 +13,6 @@ namespace Kvant {
 
 public partial class Spray
 {
-    //
-    // Bulk mesh class
-    //
-    // Duplicate and combine the given meshes to a single mesh.
-    // It duplicate the meshes as many as possible, but it will be limited by
-    // the number of vertices (<64k) and copies (<4k).
-    //
     [System.Serializable]
     class BulkMesh
     {
@@ -53,7 +54,7 @@ public partial class Spray
 
         #region Private Methods
 
-        // Cache structure to store the shape information.
+        // Cache structure used to store the shape information.
         struct ShapeCacheData
         {
             Vector3[] vertices;

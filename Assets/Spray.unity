@@ -320,24 +320,26 @@ MonoBehaviour:
   - {fileID: 4300006, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
   - {fileID: 4300002, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
   - {fileID: 4300004, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  _maxParticles: 30000
+  _maxParticles: 10000
   _emitterPosition: {x: 0, y: 0, z: 5}
   _emitterSize: {x: 30, y: 30, z: 15}
-  _minLife: .538054645
-  _maxLife: 2.72968721
-  _minScale: .00999999978
-  _maxScale: 1.11524963
+  _throttle: 1
+  _minLife: 1.38024211
+  _maxLife: 2.83515477
+  _minScale: .0880469084
+  _maxScale: .959155619
   _direction: {x: 0, y: 0, z: -1}
-  _spread: .200000003
-  _minSpeed: 0
-  _maxSpeed: 20.4999924
-  _minRotation: 234.375
-  _maxRotation: 667.187378
-  _noiseDensity: .226999998
-  _noiseVelocity: 4
+  _spread: .128000006
+  _minSpeed: 3.90625
+  _maxSpeed: 15.234375
+  _minRotation: 46.8749962
+  _maxRotation: 581.249878
+  _noiseDensity: .100000001
+  _noiseVelocity: 8.10000038
+  _noiseAnimation: 5
   _color: {r: 1, g: 1, b: 1, a: 1}
   _randomSeed: 3
-  _debug: 1
+  _debug: 0
   _kernelShader: {fileID: 4800000, guid: 5e5e161a3708e40119404232637809fc, type: 3}
   _surfaceShader: {fileID: 4800000, guid: 8e1247c2208bf4bef82f45b4c36f0600, type: 3}
   _debugShader: {fileID: 4800000, guid: 8e25f1b2c1f18429a884abde60e27b2d, type: 3}

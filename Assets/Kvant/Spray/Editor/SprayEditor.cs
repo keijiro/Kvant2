@@ -1,3 +1,7 @@
+//
+// Custom editor class for Spray.
+//
+
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
@@ -12,6 +16,7 @@ public class SprayEditor : Editor
 
     SerializedProperty propEmitterPosition;
     SerializedProperty propEmitterSize;
+    SerializedProperty propThrottle;
 
     SerializedProperty propMinLife;
     SerializedProperty propMaxLife;
@@ -30,6 +35,7 @@ public class SprayEditor : Editor
 
     SerializedProperty propNoiseVelocity;
     SerializedProperty propNoiseDensity;
+    SerializedProperty propNoiseAnimation;
 
     SerializedProperty propColor;
     SerializedProperty propRandomSeed;
@@ -42,6 +48,7 @@ public class SprayEditor : Editor
 
         propEmitterPosition = serializedObject.FindProperty("_emitterPosition");
         propEmitterSize     = serializedObject.FindProperty("_emitterSize");
+        propThrottle        = serializedObject.FindProperty("_throttle");
 
         propMinLife         = serializedObject.FindProperty("_minLife");
         propMaxLife         = serializedObject.FindProperty("_maxLife");
@@ -60,6 +67,7 @@ public class SprayEditor : Editor
 
         propNoiseVelocity   = serializedObject.FindProperty("_noiseVelocity");
         propNoiseDensity    = serializedObject.FindProperty("_noiseDensity");
+        propNoiseAnimation  = serializedObject.FindProperty("_noiseAnimation");
 
         propColor           = serializedObject.FindProperty("_color");
         propRandomSeed      = serializedObject.FindProperty("_randomSeed");
@@ -73,7 +81,7 @@ public class SprayEditor : Editor
 
         EditorGUI.BeginChangeCheck();
 
-        var label = new GUIContent(min.ToString("0.0") + " - " + max.ToString("0.0"));
+        var label = new GUIContent(min.ToString("0.00") + " - " + max.ToString("0.00"));
         EditorGUILayout.MinMaxSlider(label, ref min, ref max, minLimit, maxLimit);
 
         if (EditorGUI.EndChangeCheck()) {
@@ -84,31 +92,35 @@ public class SprayEditor : Editor
 
     public override void OnInspectorGUI()
     {
+        var targetSpray = target as Spray;
         var emptyLabel = new GUIContent();
 
         serializedObject.Update();
 
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(propMaxParticles);
+        EditorGUILayout.HelpBox("Actual Number: " + targetSpray.maxParticles, MessageType.None);
         EditorGUILayout.PropertyField(propShapes, true);
         if (EditorGUI.EndChangeCheck()) 
-            (target as Spray).NotifyConfigChanged();
+            targetSpray.NotifyConfigChanged();
+
 
         EditorGUILayout.Space();
 
-        EditorGUILayout.LabelField("Emitter Position / Size");
+        EditorGUILayout.LabelField("Emitter Position / Size / Throttle");
         EditorGUILayout.PropertyField(propEmitterPosition, emptyLabel);
         EditorGUILayout.PropertyField(propEmitterSize, emptyLabel);
+        EditorGUILayout.Slider(propThrottle, 0.0f, 1.0f, emptyLabel);
 
         EditorGUILayout.Space();
 
         EditorGUILayout.LabelField("Life");
-        MinMaxSlider(propMinLife, propMaxLife, 0.1f, 10.0f);
+        MinMaxSlider(propMinLife, propMaxLife, 0.1f, 5.0f);
 
         EditorGUILayout.Space();
 
         EditorGUILayout.LabelField("Scale");
-        MinMaxSlider(propMinScale, propMaxScale, 0.01f, 10.0f);
+        MinMaxSlider(propMinScale, propMaxScale, 0.01f, 5.0f);
 
         EditorGUILayout.Space();
 
@@ -119,14 +131,15 @@ public class SprayEditor : Editor
         EditorGUILayout.Space();
 
         EditorGUILayout.LabelField("Speed / Angular Speed");
-        MinMaxSlider(propMinSpeed, propMaxSpeed, 0.0f, 100.0f);
+        MinMaxSlider(propMinSpeed, propMaxSpeed, 0.0f, 50.0f);
         MinMaxSlider(propMinRotation, propMaxRotation, 0.0f, 1000.0f);
 
         EditorGUILayout.Space();
 
-        EditorGUILayout.LabelField("Noise Density / Velocity");
+        EditorGUILayout.LabelField("Noise Density / Velocity / Animation");
         EditorGUILayout.Slider(propNoiseDensity, 0.01f, 1.0f, emptyLabel);
         EditorGUILayout.Slider(propNoiseVelocity, 0.0f, 50.0f, emptyLabel);
+        EditorGUILayout.Slider(propNoiseAnimation, 0.0f, 10.0f, emptyLabel);
 
         EditorGUILayout.Space();
 

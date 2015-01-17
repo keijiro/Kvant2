@@ -1,4 +1,10 @@
-﻿Shader "Hidden/Kvant/Spray/Surface"
+﻿//
+// Surface shader for Spray particles.
+//
+// Looks up the position and the rotation from the textures.
+// TEXCOORD0 is used for lookup.
+//
+Shader "Hidden/Kvant/Spray/Surface"
 {
     Properties
     {
@@ -25,7 +31,7 @@
 
         float4 _Color;
         float2 _ScaleParams;
-        float2 _BufferOffset;
+        float4 _BufferOffset;
 
         struct Input
         {
@@ -52,14 +58,14 @@
 
         void vert(inout appdata_full v)
         {
-            float2 uv = v.texcoord.xy + _BufferOffset;
+            float2 uv = v.texcoord + _BufferOffset;
 
             float4 p = tex2D(_PositionTex, uv);
             float4 r = tex2D(_RotationTex, uv);
 
             // Get the scale factor from life (p.w) and scale (r.w).
-            float s = r.w * min(1.0, 5.0 - abs(5.0 - p.w * 10));
-            s = lerp(_ScaleParams.x, _ScaleParams.y, s);
+            float s = lerp(_ScaleParams.x, _ScaleParams.y, r.w);
+            s *= min(1.0, 5.0 - abs(5.0 - p.w * 10));
 
             // Recover the scalar component of the unit quaternion.
             r.w = sqrt(1.0 - dot(r.xyz, r.xyz));
