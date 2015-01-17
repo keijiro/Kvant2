@@ -42,9 +42,9 @@
     float4 qmul(float4 q1, float4 q2)
     {
         return float4(
-                q2.xyz * q1.w + q1.xyz * q2.w + cross(q1.xyz, q2.xyz),
-                q1.w * q2.w - dot(q1.xyz, q2.xyz)
-                );
+            q2.xyz * q1.w + q1.xyz * q2.w + cross(q1.xyz, q2.xyz),
+            q1.w * q2.w - dot(q1.xyz, q2.xyz)
+        );
     }
 
     // Generate a new particle.
@@ -156,8 +156,8 @@
         // Get the unit quaternion from the pixel.
         float4 q = float4(r.xyz, sqrt(1.0 - dot(r.xyz, r.xyz)));
 
-        // Apply the delta rotation.
-        q = qmul(dq, q);
+        // Apply the delta rotation, and normalize (to avoid rounding error).
+        q = normalize(qmul(dq, q));
 
         // Feed back the xyz component, with flipping when w < 0.
         r.xyz = q.xyz * sign(q.w);
