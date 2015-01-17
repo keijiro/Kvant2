@@ -2,10 +2,10 @@
 {
     Properties
     {
-        _PositionTex("-", 2D) = ""{}
-        _RotationTex("-", 2D) = ""{}
-        _Color("-", Color) = (1, 1, 1, 0.5)
-        _BufferOffset("-", float) = 0
+        _PositionTex    ("-", 2D)       = ""{}
+        _RotationTex    ("-", 2D)       = ""{}
+        _Color          ("-", Color)    = (1, 1, 1, 1)
+        _BufferOffset   ("-", Vector)   = (0, 0, 0, 0)
     }
     SubShader
     {
@@ -22,27 +22,20 @@
         sampler2D _RotationTex;
         float2 _RotationTex_TexelSize;
 
-        float _BufferOffset;
-
         float4 _Color;
+        float4 _BufferOffset;
 
         struct Input
         {
             float dummy;
         };
 
-        // PRNG function.
-        float nrand(float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
-        }
-
         // Quaternion multiplication.
         // http://mathworld.wolfram.com/Quaternion.html
         float4 qmul(float4 q1, float4 q2)
         {
             return float4(
-                q1.w * q2.xyz + q2.w * q1.xyz + cross(q1.xyz, q2.xyz),
+                q2.xyz * q1.w + q1.xyz * q2.w + cross(q1.xyz, q2.xyz),
                 q1.w * q2.w - dot(q1.xyz, q2.xyz)
             );
         }
@@ -57,12 +50,13 @@
 
         void vert(inout appdata_full v)
         {
-            float2 uv = v.texcoord + _PositionTex_TexelSize * 0.5;
-            uv.y += _BufferOffset;
+            float2 uv = v.texcoord + _BufferOffset;
 
             float4 p = tex2D(_PositionTex, uv);
             float4 r = tex2D(_RotationTex, uv);
-            float s = nrand(uv) * 0.4 + 0.1;
+
+            float s = r.w;
+            r.w = sqrt(1.0 - dot(r.xyz, r.xyz));
 
             v.vertex.xyz = rotate_vector(v.vertex.xyz, r) * s + p.xyz;
             v.normal = rotate_vector(v.normal, r);

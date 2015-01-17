@@ -13,14 +13,25 @@ public partial class Spray : MonoBehaviour
     [SerializeField] int _maxParticles = 1000;
 
     [SerializeField] Vector3 _emitterPosition = Vector3.zero;
-    [SerializeField] Vector3 _emitterSize = Vector3.zero;
+    [SerializeField] Vector3 _emitterSize = Vector3.one;
 
-    [SerializeField] float _life = 3.0f;
-    [SerializeField] float _randomness = 0.5f;
+    [SerializeField] float _minLife = 1.0f;
+    [SerializeField] float _maxLife = 4.0f;
 
-    [SerializeField] Vector3 _velocity = Vector3.forward * -10.0f;
-    [SerializeField] float _noiseVelocity = 0.0f;
-    [SerializeField] float _noiseDensity = 0.5f;
+    [SerializeField] float _minScale = 0.1f;
+    [SerializeField] float _maxScale = 1.2f;
+
+    [SerializeField] Vector3 _direction = Vector3.forward;
+    [SerializeField] float _spread = 0.2f;
+
+    [SerializeField] float _minSpeed = 2.0f;
+    [SerializeField] float _maxSpeed = 10.0f;
+
+    [SerializeField] float _minRotation = 30.0f;
+    [SerializeField] float _maxRotation = 200.0f;
+
+    [SerializeField] float _noiseDensity = 0.2f;
+    [SerializeField] float _noiseVelocity = 5.0f;
 
     [SerializeField] Color _color = Color.white;
 
@@ -86,11 +97,18 @@ public partial class Spray : MonoBehaviour
         _kernelMaterial.SetVector("_EmitterPos", _emitterPosition);
         _kernelMaterial.SetVector("_EmitterSize", _emitterSize);
 
-        _kernelMaterial.SetFloat("_Life", _life);
-        _kernelMaterial.SetFloat("_Randomness", _randomness);
+        var lsp = new Vector4(_minLife, _maxLife, _minScale, _maxScale);
+        _kernelMaterial.SetVector("_LifeScaleParams", lsp);
 
-        _kernelMaterial.SetVector("_Velocity", _velocity);
-        _kernelMaterial.SetVector("_Noise", new Vector2(_noiseDensity, _noiseVelocity));
+        var dir = new Vector4(_direction.x, _direction.y, _direction.z, _spread);
+        _kernelMaterial.SetVector("_Direction", dir);
+
+        var rs = Mathf.PI / 360;
+        var sp = new Vector4(_minSpeed, _maxSpeed, _minRotation * rs, _maxRotation * rs);
+        _kernelMaterial.SetVector("_SpeedParams", sp);
+
+        var np = new Vector2(_noiseDensity, _noiseVelocity);
+        _kernelMaterial.SetVector("_NoiseParams", np);
     }
 
     void ResetResources()
@@ -117,7 +135,7 @@ public partial class Spray : MonoBehaviour
         if (!_surfaceMaterial) _surfaceMaterial = CreateMaterial(_surfaceShader);
         if (!_debugMaterial)   _debugMaterial   = CreateMaterial(_debugShader  );
 
-        // Initialization.
+        // GPGPU buffer Initialization.
         ApplyKernelParameters();
         Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
         Graphics.Blit(null, _rotationBuffer2, _kernelMaterial, 1);
@@ -151,21 +169,22 @@ public partial class Spray : MonoBehaviour
 
         // Apply the kernel shaders.
         ApplyKernelParameters();
-
         Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 2);
         Graphics.Blit(_rotationBuffer1, _rotationBuffer2, _kernelMaterial, 3);
 
-        // Draw the meshes.
+        // Draw the bulk mesh.
+        var offset = new MaterialPropertyBlock();
+
+        _surfaceMaterial.SetColor("_Color", _color);
         _surfaceMaterial.SetTexture("_PositionTex", _positionBuffer2);
         _surfaceMaterial.SetTexture("_RotationTex", _rotationBuffer2);
-        _surfaceMaterial.SetColor("_Color", _color);
-
-        var block = new MaterialPropertyBlock();
 
         for (var i = 0; i < _positionBuffer2.height; i++)
         {
-            block.AddFloat("_BufferOffset", (float)i / _positionBuffer2.height);
-            Graphics.DrawMesh(_bulkMesh.mesh, transform.position, transform.rotation, _surfaceMaterial, 0, null, 0, block);
+            var ox = 0.5f / _positionBuffer2.width;
+            var oy = (0.5f + i) / _positionBuffer2.height;
+            offset.AddVector("_BufferOffset", new Vector2(ox, oy));
+            Graphics.DrawMesh(_bulkMesh.mesh, transform.position, transform.rotation, _surfaceMaterial, 0, null, 0, offset);
         }
     }
 
@@ -176,7 +195,7 @@ public partial class Spray : MonoBehaviour
             var r1 = new Rect(0, 0, 256, 64);
             var r2 = new Rect(0, 64, 256, 64);
             if (_positionBuffer1) Graphics.DrawTexture(r1, _positionBuffer1, _debugMaterial);
-            if (_rotationBuffer1) Graphics.DrawTexture(r2, _rotationBuffer2, _debugMaterial);
+            if (_rotationBuffer1) Graphics.DrawTexture(r2, _rotationBuffer1, _debugMaterial);
         }
     }
 

@@ -2,16 +2,13 @@
 {
     Properties
     {
-        _MainTex        ("-", 2D)       = ""{}
-
-        _EmitterPos     ("-", Vector)   = (100, 100, 100, 0)
-        _EmitterSize    ("-", Vector)   = (100, 100, 100, 0)
-
-        _Life           ("-", Float)    = 3
-        _Randomness     ("-", Float)    = 0.5
-
-        _Velocity       ("-", Vector)   = (0, 0, -10, 0)
-        _Noise          ("-", Vector)   = (0.5, 5, 0, 0)
+        _MainTex            ("-", 2D)       = ""{}
+        _EmitterPos         ("-", Vector)   = (0, 0, 0, 0)
+        _EmitterSize        ("-", Vector)   = (1, 1, 1, 0)
+        _LifeScaleParams    ("-", Vector)   = (1, 4, 0.1, 1.2)
+        _Direction          ("-", Vector)   = (0, 0, 1, 0.2)
+        _SpeedParams        ("-", Vector)   = (2, 10, 30, 200)
+        _NoiseParams        ("-", Vector)   = (0.2, 5, 0, 0)
     }
 
     CGINCLUDE
@@ -22,15 +19,12 @@
     #define PI2 6.28318530718
 
     sampler2D _MainTex;
-
     float3 _EmitterPos;
     float3 _EmitterSize;
-
-    float _Life;
-    float _Randomness;
-
-    float3 _Velocity;
-    float2 _Noise;  // Density, Velocity
+    float4 _LifeScaleParams;
+    float4 _Direction;
+    float4 _SpeedParams;
+    float4 _NoiseParams;
 
     // PRNG function.
     float nrand(float2 uv)
@@ -38,52 +32,84 @@
         return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
     }
 
-    // Uniform random unit quaternion.
-    // http://tog.acm.org/resources/GraphicsGems/gemsiii/urot.c
-    float4 random_quaternion(float2 uv)
+    float nrand(float2 uv, float salt)
     {
-        float r = nrand(uv);
-        float r1 = sqrt(1.0 - r);
-        float r2 = sqrt(r);
-
-        float t1 = PI2 * nrand(uv + float2(1, 0));
-        float t2 = PI2 * nrand(uv + float2(0, 1));
-
-        return float4(sin(t1) * r1, cos(t1) * r1, sin(t2) * r2, cos(t2) * r2);
+        return nrand(uv + float2(salt));
     }
 
-    // Get a new particle.
+    // Quaternion multiplication.
+    // http://mathworld.wolfram.com/Quaternion.html
+    float4 qmul(float4 q1, float4 q2)
+    {
+        return float4(
+                q2.xyz * q1.w + q1.xyz * q2.w + cross(q1.xyz, q2.xyz),
+                q1.w * q2.w - dot(q1.xyz, q2.xyz)
+                );
+    }
+
+    // Generate a new particle.
     float4 new_particle_position(float2 uv)
     {
-        uv += float2(_Time.x, 31.3824);
+        float t = _Time.x;
 
-        float r1 = nrand(uv);
-        float r2 = nrand(uv + float2(1, 0));
-        float r3 = nrand(uv + float2(0, 1));
-        float r4 = nrand(uv + float2(1, 1));
+        // Random position.
+        float3 p = float3(nrand(uv, t + 1), nrand(uv, t + 2), nrand(uv, t + 3));
+        p = (p - float3(0.5)) * _EmitterSize + _EmitterPos;
 
-        float3 p = float3(r1, r2, r3) - float3(0.5);
-        p = p * _EmitterSize + _EmitterPos;
-
-        float l = _Life * (1.0 - r4 * _Randomness);
+        // Random life length.
+        float l = lerp(_LifeScaleParams.x, _LifeScaleParams.y, nrand(uv, t + 4));
 
         return float4(p, l);
     }
 
     float4 new_particle_rotation(float2 uv)
     {
-        return random_quaternion(uv + float2(_Time.x, 84.737));
+        // Random scale factor.
+        float s = lerp(_LifeScaleParams.z, _LifeScaleParams.w, nrand(uv, 5));
+
+        // Uniform random unit quaternion.
+        // http://tog.acm.org/resources/GraphicsGems/gemsiii/urot.c
+        float r = nrand(uv, 6);
+        float r1 = sqrt(1.0 - r);
+        float r2 = sqrt(r);
+        float t1 = PI2 * nrand(uv, 7);
+        float t2 = PI2 * nrand(uv, 8);
+
+        // To get the quaternion, 4th component should be 'cos(t2) * r2',
+        // but we replace it with the scale factor.
+        return float4(sin(t1) * r1, cos(t1) * r1, sin(t2) * r2, s);
     }
 
-    // Position dependant noise function.
-    float3 position_noise(float3 p, float salt)
+    // Velocity function.
+    float3 get_velocity(float3 p, float2 uv)
     {
-        p *= _Noise.x;
-        salt *= 43.329;
-        float x = cnoise(p + float3(10,  0, salt));
-        float y = cnoise(p + float3( 0, 10, salt));
-        float z = cnoise(p + float3(10, 10, salt)); 
-        return float3(x, y, z);
+        // Random vector.
+        float3 v = float3(nrand(uv, 9), nrand(uv, 10), nrand(uv, 11));
+
+        // Apply the spread parameter.
+        v = lerp(_Direction.xyz, v, _Direction.w);
+
+        // Apply the speed parameter.
+        v = normalize(v) * lerp(_SpeedParams.x, _SpeedParams.y, nrand(uv, 12));
+
+        // Add noise vector.
+        p = p * _NoiseParams.x + _Time.y;
+        float nx = cnoise(p + float3(138.2, 0, 0));
+        float ny = cnoise(p + float3(0, 138.2, 0));
+        float nz = cnoise(p + float3(0, 0, 138.2));
+
+        return v + float3(nx, ny, nz) * _NoiseParams.y;
+    }
+
+    // Get the rotation axis.
+    float3 get_rotation_axis(float2 uv)
+    {
+        // Uniformaly distributed points.
+        // http://mathworld.wolfram.com/SpherePointPicking.html
+        float u = nrand(uv, 13) * 2 - 1;
+        float theta = nrand(uv, 14) * PI2;
+        float u2 = sqrt(1 - u * u);
+        return float3(u2 * cos(theta), u2 * sin(theta), u);
     }
 
     // Kernel 0 - initialize position.
@@ -101,13 +127,13 @@
     // Kernel 2 - update position.
     float4 frag_update_position(v2f_img i) : SV_Target 
     {
-        float d = unity_DeltaTime.x;
-        float r = 1.0 - nrand(i.uv) * _Randomness;
+        float dt = unity_DeltaTime.x;
         float4 p = tex2D(_MainTex, i.uv);
+
         if (p.w > 0)
         {
-            p.xyz += (_Velocity * r + position_noise(p.xyz * 0.3 + _Time.y, 0) * 8) * d;
-            p.w -= d;
+            p.xyz += get_velocity(p.xyz, i.uv) * dt;
+            p.w -= dt;
             return p;
         }
         else
@@ -116,29 +142,25 @@
         }
     }
 
-        float4 qmul(float4 q1, float4 q2)
-        {
-            return float4(
-                q1.w * q2.xyz + q2.w * q1.xyz + cross(q1.xyz, q2.xyz),
-                q1.w * q2.w - dot(q1.xyz, q2.xyz)
-            );
-        }
 
     // Kernel 3 - update rotation.
     float4 frag_update_rotation(v2f_img i) : SV_Target 
     {
-        float d = unity_DeltaTime.x;
+        float dt = unity_DeltaTime.x;
         float4 r = tex2D(_MainTex, i.uv);
 
-        float uv = i.uv + float2(0, 31.3824);
+        // Get the delta rotation quaternion.
+        float theta = lerp(_SpeedParams.z, _SpeedParams.w, nrand(i.uv, 15)) * dt;
+        float4 dq = float4(get_rotation_axis(i.uv) * sin(theta), cos(theta));
 
-        float x1 = nrand(uv);
-        float x2 = nrand(uv + float2(1, 0));
-        float x3 = nrand(uv + float2(0, 1));
+        // Get the unit quaternion from the pixel.
+        float4 q = float4(r.xyz, sqrt(1.0 - dot(r.xyz, r.xyz)));
 
-        float3 v = normalize(float3(x1, x2, x3) - float3(0.5));
+        // Apply the delta rotation.
+        q = qmul(dq, q);
 
-        r = qmul(r, float4(v * sin(1.8 * d), cos(1.8 * d)));
+        // Feed back the xyz component, with flipping when w < 0.
+        r.xyz = q.xyz * sign(q.w);
 
         return r;
     }
