@@ -320,23 +320,23 @@ MonoBehaviour:
   - {fileID: 4300006, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
   - {fileID: 4300002, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
   - {fileID: 4300004, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  _maxParticles: 10
+  _maxParticles: 30000
   _emitterPosition: {x: 0, y: 0, z: 5}
   _emitterSize: {x: 30, y: 30, z: 15}
   _minLife: .538054645
   _maxLife: 2.72968721
   _minScale: .00999999978
-  _maxScale: .646968365
+  _maxScale: 1.11524963
   _direction: {x: 0, y: 0, z: -1}
   _spread: .200000003
-  _minSpeed: 9.23286247
-  _maxSpeed: 41.4516068
+  _minSpeed: 0
+  _maxSpeed: 20.4999924
   _minRotation: 234.375
   _maxRotation: 667.187378
   _noiseDensity: .226999998
   _noiseVelocity: 4
   _color: {r: 1, g: 1, b: 1, a: 1}
-  _randomSeed: 0
+  _randomSeed: 3
   _debug: 1
   _kernelShader: {fileID: 4800000, guid: 5e5e161a3708e40119404232637809fc, type: 3}
   _surfaceShader: {fileID: 4800000, guid: 8e1247c2208bf4bef82f45b4c36f0600, type: 3}

@@ -109,6 +109,8 @@ public partial class Spray : MonoBehaviour
 
         var np = new Vector2(_noiseDensity, _noiseVelocity);
         _kernelMaterial.SetVector("_NoiseParams", np);
+
+        _kernelMaterial.SetFloat("_RandomSeed", _randomSeed);
     }
 
     void ResetResources()
@@ -177,8 +179,8 @@ public partial class Spray : MonoBehaviour
 
         _surfaceMaterial.SetTexture("_PositionTex", _positionBuffer2);
         _surfaceMaterial.SetTexture("_RotationTex", _rotationBuffer2);
-        _surfaceMaterial.SetVector("_ScaleParams", new Vector2(_minScale, _maxScale));
         _surfaceMaterial.SetColor("_Color", _color);
+        _surfaceMaterial.SetVector("_ScaleParams", new Vector2(_minScale, _maxScale));
 
         for (var i = 0; i < _positionBuffer2.height; i++)
         {

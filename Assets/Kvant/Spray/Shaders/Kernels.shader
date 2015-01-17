@@ -2,13 +2,14 @@
 {
     Properties
     {
-        _MainTex            ("-", 2D)       = ""{}
-        _EmitterPos         ("-", Vector)   = (0, 0, 0, 0)
-        _EmitterSize        ("-", Vector)   = (1, 1, 1, 0)
-        _LifeParams         ("-", Vector)   = (0.1, 1.2, 0, 0)
-        _Direction          ("-", Vector)   = (0, 0, 1, 0.2)
-        _SpeedParams        ("-", Vector)   = (2, 10, 30, 200)
-        _NoiseParams        ("-", Vector)   = (0.2, 5, 0, 0)
+        _MainTex        ("-", 2D)       = ""{}
+        _EmitterPos     ("-", Vector)   = (0, 0, 0, 0)
+        _EmitterSize    ("-", Vector)   = (1, 1, 1, 0)
+        _LifeParams     ("-", Vector)   = (0.1, 1.2, 0, 0)
+        _Direction      ("-", Vector)   = (0, 0, 1, 0.2)
+        _SpeedParams    ("-", Vector)   = (2, 10, 30, 200)
+        _NoiseParams    ("-", Vector)   = (0.2, 5, 0, 0)
+        _RandomSeed     ("-", Float)    = 0
     }
 
     CGINCLUDE
@@ -25,16 +26,13 @@
     float4 _Direction;
     float4 _SpeedParams;
     float4 _NoiseParams;
+    float _RandomSeed;
 
     // PRNG function.
-    float nrand(float2 uv)
-    {
-        return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
-    }
-
     float nrand(float2 uv, float salt)
     {
-        return nrand(uv + float2(salt));
+        uv += float2(salt, _RandomSeed);
+        return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
     }
 
     // Quaternion multiplication.

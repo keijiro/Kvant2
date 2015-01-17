@@ -52,7 +52,7 @@
 
         void vert(inout appdata_full v)
         {
-            float2 uv = v.texcoord + _BufferOffset;
+            float2 uv = v.texcoord.xy + _BufferOffset;
 
             float4 p = tex2D(_PositionTex, uv);
             float4 r = tex2D(_RotationTex, uv);
