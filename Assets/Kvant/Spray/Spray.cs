@@ -34,7 +34,7 @@ public partial class Spray : MonoBehaviour
     [SerializeField] float _noiseVelocity = 5.0f;
 
     [SerializeField] Color _color = Color.white;
-
+    [SerializeField] int _randomSeed = 0;
     [SerializeField] bool _debug;
 
     #endregion
@@ -97,8 +97,8 @@ public partial class Spray : MonoBehaviour
         _kernelMaterial.SetVector("_EmitterPos", _emitterPosition);
         _kernelMaterial.SetVector("_EmitterSize", _emitterSize);
 
-        var lsp = new Vector4(1.0f / _minLife, 1.0f / _maxLife, _minScale, _maxScale);
-        _kernelMaterial.SetVector("_LifeScaleParams", lsp);
+        var lp = new Vector2(1.0f / _minLife, 1.0f / _maxLife);
+        _kernelMaterial.SetVector("_LifeParams", lp);
 
         var dir = new Vector4(_direction.x, _direction.y, _direction.z, _spread);
         _kernelMaterial.SetVector("_Direction", dir);
@@ -175,9 +175,10 @@ public partial class Spray : MonoBehaviour
         // Draw the bulk mesh.
         var offset = new MaterialPropertyBlock();
 
-        _surfaceMaterial.SetColor("_Color", _color);
         _surfaceMaterial.SetTexture("_PositionTex", _positionBuffer2);
         _surfaceMaterial.SetTexture("_RotationTex", _rotationBuffer2);
+        _surfaceMaterial.SetVector("_ScaleParams", new Vector2(_minScale, _maxScale));
+        _surfaceMaterial.SetColor("_Color", _color);
 
         for (var i = 0; i < _positionBuffer2.height; i++)
         {

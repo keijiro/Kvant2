@@ -5,6 +5,7 @@
         _PositionTex    ("-", 2D)       = ""{}
         _RotationTex    ("-", 2D)       = ""{}
         _Color          ("-", Color)    = (1, 1, 1, 1)
+        _ScaleParams    ("-", Vector)   = (1, 1, 0, 0)
         _BufferOffset   ("-", Vector)   = (0, 0, 0, 0)
     }
     SubShader
@@ -23,7 +24,8 @@
         float2 _RotationTex_TexelSize;
 
         float4 _Color;
-        float4 _BufferOffset;
+        float2 _ScaleParams;
+        float2 _BufferOffset;
 
         struct Input
         {
@@ -57,6 +59,7 @@
 
             // Get the scale factor from life (p.w) and scale (r.w).
             float s = r.w * min(1.0, 5.0 - abs(5.0 - p.w * 10));
+            s = lerp(_ScaleParams.x, _ScaleParams.y, s);
 
             // Recover the scalar component of the unit quaternion.
             r.w = sqrt(1.0 - dot(r.xyz, r.xyz));

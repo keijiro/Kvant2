@@ -323,19 +323,20 @@ MonoBehaviour:
   _maxParticles: 10
   _emitterPosition: {x: 0, y: 0, z: 5}
   _emitterSize: {x: 30, y: 30, z: 15}
-  _minLife: 1
-  _maxLife: 4
-  _minScale: .100000001
-  _maxScale: 1.20000005
+  _minLife: .538054645
+  _maxLife: 2.72968721
+  _minScale: .00999999978
+  _maxScale: .646968365
   _direction: {x: 0, y: 0, z: -1}
   _spread: .200000003
-  _minSpeed: 2
-  _maxSpeed: 10
-  _minRotation: 100
-  _maxRotation: 400
-  _noiseDensity: .100000001
+  _minSpeed: 9.23286247
+  _maxSpeed: 41.4516068
+  _minRotation: 234.375
+  _maxRotation: 667.187378
+  _noiseDensity: .226999998
   _noiseVelocity: 4
   _color: {r: 1, g: 1, b: 1, a: 1}
+  _randomSeed: 0
   _debug: 1
   _kernelShader: {fileID: 4800000, guid: 5e5e161a3708e40119404232637809fc, type: 3}
   _surfaceShader: {fileID: 4800000, guid: 8e1247c2208bf4bef82f45b4c36f0600, type: 3}

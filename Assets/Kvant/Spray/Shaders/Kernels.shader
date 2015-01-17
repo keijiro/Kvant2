@@ -5,7 +5,7 @@
         _MainTex            ("-", 2D)       = ""{}
         _EmitterPos         ("-", Vector)   = (0, 0, 0, 0)
         _EmitterSize        ("-", Vector)   = (1, 1, 1, 0)
-        _LifeScaleParams    ("-", Vector)   = (1, 4, 0.1, 1.2)
+        _LifeParams         ("-", Vector)   = (0.1, 1.2, 0, 0)
         _Direction          ("-", Vector)   = (0, 0, 1, 0.2)
         _SpeedParams        ("-", Vector)   = (2, 10, 30, 200)
         _NoiseParams        ("-", Vector)   = (0.2, 5, 0, 0)
@@ -21,7 +21,7 @@
     sampler2D _MainTex;
     float3 _EmitterPos;
     float3 _EmitterSize;
-    float4 _LifeScaleParams;
+    float2 _LifeParams;
     float4 _Direction;
     float4 _SpeedParams;
     float4 _NoiseParams;
@@ -62,7 +62,7 @@
     float4 new_particle_rotation(float2 uv)
     {
         // Random scale factor.
-        float s = lerp(_LifeScaleParams.z, _LifeScaleParams.w, nrand(uv, 5));
+        float s = nrand(uv, 5);
 
         // Uniform random unit quaternion.
         // http://tog.acm.org/resources/GraphicsGems/gemsiii/urot.c
@@ -131,7 +131,7 @@
         if (p.w > 0)
         {
             p.xyz += get_velocity(p.xyz, i.uv) * dt;
-            p.w -= lerp(_LifeScaleParams.x, _LifeScaleParams.y, nrand(i.uv, 4)) * dt;
+            p.w -= lerp(_LifeParams.x, _LifeParams.y, nrand(i.uv, 4)) * dt;
             return p;
         }
         else
