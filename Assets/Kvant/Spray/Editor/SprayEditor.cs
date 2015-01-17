@@ -33,8 +33,8 @@ public class SprayEditor : Editor
     SerializedProperty propMinRotation;
     SerializedProperty propMaxRotation;
 
-    SerializedProperty propNoiseVelocity;
-    SerializedProperty propNoiseDensity;
+    SerializedProperty propNoiseFrequency;
+    SerializedProperty propNoiseSpeed;
     SerializedProperty propNoiseAnimation;
 
     SerializedProperty propColor;
@@ -65,8 +65,8 @@ public class SprayEditor : Editor
         propMinRotation     = serializedObject.FindProperty("_minRotation");
         propMaxRotation     = serializedObject.FindProperty("_maxRotation");
 
-        propNoiseVelocity   = serializedObject.FindProperty("_noiseVelocity");
-        propNoiseDensity    = serializedObject.FindProperty("_noiseDensity");
+        propNoiseFrequency  = serializedObject.FindProperty("_noiseFrequency");
+        propNoiseSpeed      = serializedObject.FindProperty("_noiseSpeed");
         propNoiseAnimation  = serializedObject.FindProperty("_noiseAnimation");
 
         propColor           = serializedObject.FindProperty("_color");
@@ -128,9 +128,9 @@ public class SprayEditor : Editor
 
         EditorGUILayout.Space();
 
-        EditorGUILayout.LabelField("Noise Density / Velocity / Animation");
-        EditorGUILayout.Slider(propNoiseDensity, 0.01f, 1.0f, emptyLabel);
-        EditorGUILayout.Slider(propNoiseVelocity, 0.0f, 50.0f, emptyLabel);
+        EditorGUILayout.LabelField("Noise Frequency / Speed / Animation");
+        EditorGUILayout.Slider(propNoiseFrequency, 0.01f, 1.0f, emptyLabel);
+        EditorGUILayout.Slider(propNoiseSpeed, 0.0f, 50.0f, emptyLabel);
         EditorGUILayout.Slider(propNoiseAnimation, 0.0f, 10.0f, emptyLabel);
 
         EditorGUILayout.Space();

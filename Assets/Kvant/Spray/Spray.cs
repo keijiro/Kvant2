@@ -35,8 +35,8 @@ public partial class Spray : MonoBehaviour
     [SerializeField] float _minRotation = 30.0f;
     [SerializeField] float _maxRotation = 200.0f;
 
-    [SerializeField] float _noiseDensity = 0.2f;
-    [SerializeField] float _noiseVelocity = 5.0f;
+    [SerializeField] float _noiseFrequency = 0.2f;
+    [SerializeField] float _noiseSpeed = 5.0f;
     [SerializeField] float _noiseAnimation = 1.0f;
 
     [SerializeField] Color _color = Color.white;
@@ -114,13 +114,13 @@ public partial class Spray : MonoBehaviour
         set { _maxRotation = value; }
     }
 
-    public float noiseDensity {
-        get { return _noiseDensity; }
-        set { _noiseDensity = value; }
+    public float noiseFrequency {
+        get { return _noiseFrequency; }
+        set { _noiseFrequency = value; }
     }
-    public float noiseVelocity {
-        get { return _noiseVelocity; }
-        set { _noiseVelocity = value; }
+    public float noiseSpeed {
+        get { return _noiseSpeed; }
+        set { _noiseSpeed = value; }
     }
     public float noiseAnimation {
         get { return _noiseAnimation; }
@@ -196,7 +196,7 @@ public partial class Spray : MonoBehaviour
         var sparams = new Vector4(_minSpeed, _maxSpeed, _minRotation * pi360, _maxRotation * pi360);
         _kernelMaterial.SetVector("_SpeedParams", sparams);
 
-        var np = new Vector3(_noiseDensity, _noiseVelocity, _noiseAnimation);
+        var np = new Vector3(_noiseFrequency, _noiseSpeed, _noiseAnimation);
         _kernelMaterial.SetVector("_NoiseParams", np);
 
         var delta = Application.isPlaying ? Time.deltaTime : 1.0f;

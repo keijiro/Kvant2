@@ -328,8 +328,8 @@ MonoBehaviour:
   _maxSpeed: 15.234375
   _minRotation: 46.8749962
   _maxRotation: 581.249878
-  _noiseDensity: .100000001
-  _noiseVelocity: 8.10000038
+  _noiseFrequency: .200000003
+  _noiseSpeed: 5
   _noiseAnimation: 5
   _color: {r: 1, g: 1, b: 1, a: 1}
   _randomSeed: 3
