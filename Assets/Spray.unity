@@ -320,7 +320,7 @@ MonoBehaviour:
   - {fileID: 4300006, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
   - {fileID: 4300002, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
   - {fileID: 4300004, guid: a8e303374d34f4235b1c7b5580f73486, type: 3}
-  _maxParticles: 10000
+  _maxParticles: 10
   _emitterPosition: {x: 0, y: 0, z: 5}
   _emitterSize: {x: 30, y: 30, z: 15}
   _minLife: 1

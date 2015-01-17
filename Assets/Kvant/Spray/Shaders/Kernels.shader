@@ -56,10 +56,7 @@
         float3 p = float3(nrand(uv, t + 1), nrand(uv, t + 2), nrand(uv, t + 3));
         p = (p - float3(0.5)) * _EmitterSize + _EmitterPos;
 
-        // Random life length.
-        float l = lerp(_LifeScaleParams.x, _LifeScaleParams.y, nrand(uv, t + 4));
-
-        return float4(p, l);
+        return float4(p, 1); // life = 1
     }
 
     float4 new_particle_rotation(float2 uv)
@@ -85,6 +82,7 @@
     {
         // Random vector.
         float3 v = float3(nrand(uv, 9), nrand(uv, 10), nrand(uv, 11));
+        v = (v - float3(0.5)) * 2;
 
         // Apply the spread parameter.
         v = lerp(_Direction.xyz, v, _Direction.w);
@@ -133,7 +131,7 @@
         if (p.w > 0)
         {
             p.xyz += get_velocity(p.xyz, i.uv) * dt;
-            p.w -= dt;
+            p.w -= lerp(_LifeScaleParams.x, _LifeScaleParams.y, nrand(i.uv, 4)) * dt;
             return p;
         }
         else
@@ -141,7 +139,6 @@
             return new_particle_position(i.uv);
         }
     }
-
 
     // Kernel 3 - update rotation.
     float4 frag_update_rotation(v2f_img i) : SV_Target 

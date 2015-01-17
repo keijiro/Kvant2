@@ -97,7 +97,7 @@ public partial class Spray : MonoBehaviour
         _kernelMaterial.SetVector("_EmitterPos", _emitterPosition);
         _kernelMaterial.SetVector("_EmitterSize", _emitterSize);
 
-        var lsp = new Vector4(_minLife, _maxLife, _minScale, _maxScale);
+        var lsp = new Vector4(1.0f / _minLife, 1.0f / _maxLife, _minScale, _maxScale);
         _kernelMaterial.SetVector("_LifeScaleParams", lsp);
 
         var dir = new Vector4(_direction.x, _direction.y, _direction.z, _spread);

@@ -55,9 +55,13 @@
             float4 p = tex2D(_PositionTex, uv);
             float4 r = tex2D(_RotationTex, uv);
 
-            float s = r.w;
+            // Get the scale factor from life (p.w) and scale (r.w).
+            float s = r.w * min(1.0, 5.0 - abs(5.0 - p.w * 10));
+
+            // Recover the scalar component of the unit quaternion.
             r.w = sqrt(1.0 - dot(r.xyz, r.xyz));
 
+            // Apply the rotation and the scaling.
             v.vertex.xyz = rotate_vector(v.vertex.xyz, r) * s + p.xyz;
             v.normal = rotate_vector(v.normal, r);
         }
