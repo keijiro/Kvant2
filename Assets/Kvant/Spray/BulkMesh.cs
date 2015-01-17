@@ -71,9 +71,20 @@ public partial class Spray
                 }
                 else
                 {
-                    vertices = null;
-                    normals = null;
-                    indices = null;
+                    // The source mesh is empty; replaces with a two-sided quad.
+                    vertices = new Vector3[] {
+                        new Vector3 (-1, +1, 0), new Vector3 (+1, +1, 0),
+                        new Vector3 (-1, -1, 0), new Vector3 (+1, -1, 0),
+                        new Vector3 (+1, +1, 0), new Vector3 (-1, +1, 0),
+                        new Vector3 (+1, -1, 0), new Vector3 (-1, -1, 0)
+                    };
+                    normals = new Vector3[] {
+                         Vector3.forward,  Vector3.forward,
+                         Vector3.forward,  Vector3.forward,
+                        -Vector3.forward, -Vector3.forward,
+                        -Vector3.forward, -Vector3.forward,
+                    };
+                    indices = new int[] {0, 1, 2, 3, 2, 1, 4, 5, 6, 7, 6, 5};
                 }
             }
 
@@ -100,10 +111,21 @@ public partial class Spray
         // Mesh combiner functoin.
         void CombineMeshes(Mesh[] shapes)
         {
-            // Store the meshes into the shape cache.
-            var cache = new ShapeCacheData[shapes.Length];
-            for (var i = 0; i < shapes.Length; i++)
-                cache[i] = new ShapeCacheData(shapes[i]);
+            ShapeCacheData[] cache;
+
+            if (shapes == null || shapes.Length == 0)
+            {
+                // The shape array is empty; use the default shape.
+                cache = new ShapeCacheData[1];
+                cache[0] = new ShapeCacheData(null);
+            }
+            else
+            {
+                // Store the meshes into the shape cache.
+                cache = new ShapeCacheData[shapes.Length];
+                for (var i = 0; i < shapes.Length; i++)
+                    cache[i] = new ShapeCacheData(shapes[i]);
+            }
 
             // Count the number of vertices and indices in the shape cache.
             var vc_shapes = 0;
@@ -123,7 +145,7 @@ public partial class Spray
             var ic = 0;
             for (_copyCount = 0; _copyCount < 4096; _copyCount++)
             {
-                var s = cache[_copyCount % shapes.Length];
+                var s = cache[_copyCount % cache.Length];
                 if (vc + s.VertexCount > 65535) break;
                 vc += s.VertexCount;
                 ic += s.IndexCount;
@@ -137,7 +159,7 @@ public partial class Spray
 
             for (int va_i = 0, ia_i = 0, e_i = 0; va_i < vc; e_i++)
             {
-                var s = cache[e_i % shapes.Length];
+                var s = cache[e_i % cache.Length];
 
                 s.CopyVerticesTo(va, va_i);
                 s.CopyNormalsTo(na, va_i);
