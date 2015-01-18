@@ -31,7 +31,11 @@ Shader "Hidden/Kvant/Streamline/Line"
     };
 
     sampler2D _PositionTex1;
+    float4 _PositionTex1_TexelSize;
+
     sampler2D _PositionTex2;
+    float4 _PositionTex2_TexelSize;
+
     half4 _Color;
     float _Tail;
 
@@ -39,7 +43,7 @@ Shader "Hidden/Kvant/Streamline/Line"
     {
         v2f o;
 
-        float2 uv = v.texcoord.xy;
+        float2 uv = v.texcoord.xy + _PositionTex1_TexelSize.xy / 2;
 
         float4 p1 = tex2D(_PositionTex1, uv);
         float4 p2 = tex2D(_PositionTex2, uv);
