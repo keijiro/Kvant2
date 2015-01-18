@@ -127,6 +127,11 @@ public partial class Spray : MonoBehaviour
         set { _noiseAnimation = value; }
     }
 
+    public Color color {
+        get { return _color; }
+        set { _color = value; }
+    }
+
     #endregion
 
     #region Shader And Materials
@@ -159,7 +164,7 @@ public partial class Spray : MonoBehaviour
 
     #region Resource Management
 
-    public void NotifyConfigChanged()
+    public void NotifyConfigChange()
     {
         _needsReset = true;
     }

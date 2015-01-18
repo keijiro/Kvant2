@@ -274,6 +274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c8daf798f0664336a4e8b9d914d7502, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _maxParticles: 32768
   _emitterPosition: {x: 0, y: 0, z: 20}
   _emitterSize: {x: 40, y: 40, z: 40}
   _throttle: 1

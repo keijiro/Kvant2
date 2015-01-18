@@ -100,7 +100,7 @@ public class SprayEditor : Editor
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(propMaxParticles);
         EditorGUILayout.HelpBox("Actual Number: " + targetSpray.maxParticles, MessageType.None);
-        if (EditorGUI.EndChangeCheck()) targetSpray.NotifyConfigChanged();
+        if (EditorGUI.EndChangeCheck()) targetSpray.NotifyConfigChange();
 
         EditorGUILayout.Space();
 
@@ -137,7 +137,7 @@ public class SprayEditor : Editor
 
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(propShapes, true);
-        if (EditorGUI.EndChangeCheck()) targetSpray.NotifyConfigChanged();
+        if (EditorGUI.EndChangeCheck()) targetSpray.NotifyConfigChange();
 
         EditorGUILayout.Space();
 
