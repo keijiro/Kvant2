@@ -30,6 +30,7 @@ public class Streamline : MonoBehaviour
     [SerializeField] float _noiseAnimation = 1.0f;
 
     [SerializeField] Color _color = Color.white;
+    [SerializeField] float _colorAmp = 1.0f;
     [SerializeField] float _tail = 1.0f;
 
     [SerializeField] int _randomSeed = 0;
@@ -92,6 +93,10 @@ public class Streamline : MonoBehaviour
     public Color color {
         get { return _color; }
         set { _color = value; }
+    }
+    public float colorAmp {
+        get { return _colorAmp; }
+        set { _colorAmp = value; }
     }
     public float tail {
         get { return _tail; }
@@ -301,7 +306,7 @@ public class Streamline : MonoBehaviour
         _lineMaterial.SetTexture("_PositionTex1", _positionBuffer1);
         _lineMaterial.SetTexture("_PositionTex2", _positionBuffer2);
         _lineMaterial.SetColor("_Color", _color);
-        _lineMaterial.SetFloat("_Tail", _tail);
+        _lineMaterial.SetVector("_Options", new Vector2(_tail, _colorAmp));
         Graphics.DrawMesh(_mesh, transform.position, transform.rotation, _lineMaterial, 0);
     }
 

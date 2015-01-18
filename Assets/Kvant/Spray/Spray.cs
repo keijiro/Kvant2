@@ -13,7 +13,7 @@ public partial class Spray : MonoBehaviour
 {
     #region Parameters Exposed To Editor
 
-    [SerializeField] Mesh[] _shapes;
+    [SerializeField] Mesh[] _shapes = new Mesh[1];
     [SerializeField] int _maxParticles = 1000;
 
     [SerializeField] Vector3 _emitterPosition = Vector3.zero;

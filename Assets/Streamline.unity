@@ -286,6 +286,7 @@ MonoBehaviour:
   _noiseSpeed: .100000001
   _noiseAnimation: 1
   _color: {r: 1, g: 1, b: 1, a: 1}
+  _colorAmp: 1
   _tail: 1.79999995
   _randomSeed: 3
   _debug: 0

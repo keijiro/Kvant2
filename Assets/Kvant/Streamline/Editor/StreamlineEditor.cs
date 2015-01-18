@@ -28,6 +28,7 @@ public class StreamlineEditor : Editor
     SerializedProperty propNoiseAnimation;
 
     SerializedProperty propColor;
+    SerializedProperty propColorAmp;
     SerializedProperty propTail;
 
     SerializedProperty propRandomSeed;
@@ -52,6 +53,7 @@ public class StreamlineEditor : Editor
         propNoiseAnimation  = serializedObject.FindProperty("_noiseAnimation");
 
         propColor           = serializedObject.FindProperty("_color");
+        propColorAmp        = serializedObject.FindProperty("_colorAmp");
         propTail            = serializedObject.FindProperty("_tail");
 
         propRandomSeed      = serializedObject.FindProperty("_randomSeed");
@@ -110,6 +112,7 @@ public class StreamlineEditor : Editor
         EditorGUILayout.Space();
 
         EditorGUILayout.PropertyField(propColor);
+        EditorGUILayout.Slider(propColorAmp, 1.0f, 20.0f);
         EditorGUILayout.Slider(propTail, 0.0f, 20.0f);
 
         EditorGUILayout.Space();

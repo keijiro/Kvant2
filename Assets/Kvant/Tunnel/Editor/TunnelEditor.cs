@@ -26,6 +26,7 @@ public class TunnelEditor : Editor
 
     SerializedProperty propSurfaceColor;
     SerializedProperty propLineColor;
+    SerializedProperty propLineColorAmp;
 
     SerializedProperty propDebug;
 
@@ -46,6 +47,7 @@ public class TunnelEditor : Editor
 
         propSurfaceColor    = serializedObject.FindProperty("_surfaceColor");
         propLineColor       = serializedObject.FindProperty("_lineColor");
+        propLineColorAmp    = serializedObject.FindProperty("_lineColorAmp");
 
         propDebug           = serializedObject.FindProperty("_debug");
     }
@@ -80,6 +82,7 @@ public class TunnelEditor : Editor
 
         EditorGUILayout.PropertyField(propSurfaceColor);
         EditorGUILayout.PropertyField(propLineColor);
+        EditorGUILayout.Slider(propLineColorAmp, 1.0f, 20.0f);
 
         EditorGUILayout.Space();
 

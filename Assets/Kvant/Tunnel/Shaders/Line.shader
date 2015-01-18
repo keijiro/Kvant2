@@ -5,8 +5,9 @@ Shader "Hidden/Kvant/Tunnel/Line"
 {
     Properties
     {
-        _PositionTex    ("-", 2D)           = ""{}
-        _Color          ("Color", Color)    = (1, 1, 1, 0.5)
+        _PositionTex    ("-", 2D)       = ""{}
+        _Color          ("-", Color)    = (1, 1, 1, 0.5)
+        _ColroAmp       ("-", Float)    = 1
     }
 
     CGINCLUDE
@@ -21,7 +22,8 @@ Shader "Hidden/Kvant/Tunnel/Line"
     sampler2D _PositionTex;
     float4 _PositionTex_TexelSize;
 
-    half4 _Color;
+    float4 _Color;
+    float _ColorAmp;
 
     v2f vert(appdata_base v)
     {
@@ -38,7 +40,7 @@ Shader "Hidden/Kvant/Tunnel/Line"
 
     half4 frag(v2f i) : COLOR
     {
-        return _Color;
+        return _Color * _ColorAmp;
     }
 
     ENDCG

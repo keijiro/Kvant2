@@ -28,6 +28,7 @@ public partial class Tunnel : MonoBehaviour
 
     [SerializeField] Color _surfaceColor = new Color(0.8f, 0.8f, 0.8f, 1);
     [SerializeField] Color _lineColor = new Color(1, 1, 1, 0);
+    [SerializeField] float _lineColorAmp = 1;
 
     [SerializeField] bool _debug;
 
@@ -81,6 +82,11 @@ public partial class Tunnel : MonoBehaviour
     public Color lineColor {
         get { return _lineColor; }
         set { _lineColor = value; }
+    }
+
+    public float lineColorAmp {
+        get { return _lineColorAmp; }
+        set { _lineColorAmp = value; }
     }
 
     #endregion
@@ -229,6 +235,7 @@ public partial class Tunnel : MonoBehaviour
         _surfaceMaterial1.SetColor("_Color", _surfaceColor);
         _surfaceMaterial2.SetColor("_Color", _surfaceColor);
         _lineMaterial.SetColor("_Color", _lineColor);
+        _lineMaterial.SetFloat("_ColorAmp", _lineColorAmp);
 
         foreach (var mesh in _lattice.meshes)
         {

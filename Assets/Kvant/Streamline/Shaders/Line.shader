@@ -11,7 +11,7 @@ Shader "Hidden/Kvant/Streamline/Line"
         _PositionTex1   ("-", 2D)       = ""{}
         _PositionTex2   ("-", 2D)       = ""{}
         _Color          ("-", Color)    = (1, 1, 1, 1)
-        _Tail           ("_", Float)    = 1
+        _Options        ("-", Vector)   = (1, 1, 0, 0)
     }
 
     CGINCLUDE
@@ -37,7 +37,7 @@ Shader "Hidden/Kvant/Streamline/Line"
     float4 _PositionTex2_TexelSize;
 
     half4 _Color;
-    float _Tail;
+    float2 _Options; // (tail, color amp)
 
     v2f vert(appdata v)
     {
@@ -55,11 +55,11 @@ Shader "Hidden/Kvant/Streamline/Line"
         }
         else
         {
-            float3 p = lerp(p2.xyz, p1.xyz, (1.0 - sw) * _Tail);
+            float3 p = lerp(p2.xyz, p1.xyz, (1.0 - sw) * _Options.x);
             o.position = mul(UNITY_MATRIX_MVP, float4(p, 1));
         }
 
-        o.color = _Color;
+        o.color = _Color * _Options.y;
         o.color.a *= sw;
 
         return o;

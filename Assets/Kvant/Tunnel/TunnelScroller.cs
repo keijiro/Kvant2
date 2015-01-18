@@ -25,7 +25,7 @@ public class TunnelScroller : MonoBehaviour
         position += velocity * Time.deltaTime;
         twist += spin * Time.deltaTime;
 
-        transform.localPosition = Vector3.forward * -(position % step);
+        transform.localPosition = transform.forward * -(position % step);
 
         tunnel.offset = Mathf.Floor(position / step) * step;
         tunnel.twist = twist;
