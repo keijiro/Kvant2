@@ -1,3 +1,7 @@
+//
+// Custom editor for Tunnel.
+//
+
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
@@ -16,7 +20,7 @@ public class TunnelEditor : Editor
     SerializedProperty propOffset;
     SerializedProperty propTwist;
 
-    SerializedProperty propDensity;
+    SerializedProperty propFrequency;
     SerializedProperty propBump;
     SerializedProperty propWarp;
 
@@ -27,23 +31,23 @@ public class TunnelEditor : Editor
 
     void OnEnable()
     {
-        propRadius = serializedObject.FindProperty("_radius");
-        propHeight = serializedObject.FindProperty("_height");
+        propRadius          = serializedObject.FindProperty("_radius");
+        propHeight          = serializedObject.FindProperty("_height");
 
-        propSlices = serializedObject.FindProperty("_slices");
-        propStacks = serializedObject.FindProperty("_stacks");
+        propSlices          = serializedObject.FindProperty("_slices");
+        propStacks          = serializedObject.FindProperty("_stacks");
 
-        propOffset  = serializedObject.FindProperty("_offset");
-        propTwist   = serializedObject.FindProperty("_twist");
+        propOffset          = serializedObject.FindProperty("_offset");
+        propTwist           = serializedObject.FindProperty("_twist");
 
-        propDensity = serializedObject.FindProperty("_density");
-        propBump    = serializedObject.FindProperty("_bump");
-        propWarp    = serializedObject.FindProperty("_warp");
+        propFrequency       = serializedObject.FindProperty("_frequency");
+        propBump            = serializedObject.FindProperty("_bump");
+        propWarp            = serializedObject.FindProperty("_warp");
 
-        propSurfaceColor = serializedObject.FindProperty("_surfaceColor");
-        propLineColor    = serializedObject.FindProperty("_lineColor");
+        propSurfaceColor    = serializedObject.FindProperty("_surfaceColor");
+        propLineColor       = serializedObject.FindProperty("_lineColor");
 
-        propDebug   = serializedObject.FindProperty("_debug");
+        propDebug           = serializedObject.FindProperty("_debug");
     }
 
     public override void OnInspectorGUI()
@@ -68,7 +72,7 @@ public class TunnelEditor : Editor
 
         EditorGUILayout.Space();
 
-        EditorGUILayout.PropertyField(propDensity);
+        EditorGUILayout.PropertyField(propFrequency);
         EditorGUILayout.PropertyField(propBump);
         EditorGUILayout.PropertyField(propWarp);
 

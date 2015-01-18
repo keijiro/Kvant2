@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿//
+// Infinite scroller for Tunnel.
+//
+
+using UnityEngine;
 using System.Collections;
 
 namespace Kvant {

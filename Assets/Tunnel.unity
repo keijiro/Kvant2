@@ -82,8 +82,8 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 451641153}
-  - 114: {fileID: 451641152}
   - 114: {fileID: 451641154}
+  - 114: {fileID: 451641152}
   m_Layer: 0
   m_Name: Tunnel
   m_TagString: Untagged
@@ -99,25 +99,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 451641151}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92e249489f63543c885ac94d0b5b3b00, type: 3}
+  m_Script: {fileID: 11500000, guid: ed34eadf0aa64494889ad6638f6e7985, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _radius: 5
-  _height: 77.8099976
-  _slices: 59
-  _stacks: 216
-  _offset: 0
-  _twist: 0
-  _density: 3
-  _bump: 3.00999999
-  _warp: 1.35000002
-  _surfaceColor: {r: 1, g: 1, b: 1, a: 1}
-  _lineColor: {r: 1, g: 0, b: 0, a: .478431374}
-  _debug: 0
-  _constructShader: {fileID: 4800000, guid: ef390bfe222ea4d9eb8e7adc72288e7a, type: 3}
-  _surfaceShader: {fileID: 4800000, guid: f33edb5130bfa478388adbb7df3b9b8a, type: 3}
-  _lineShader: {fileID: 4800000, guid: ed2825438c1e0421d9e72e12fac0521b, type: 3}
-  _debugShader: {fileID: 4800000, guid: 8e25f1b2c1f18429a884abde60e27b2d, type: 3}
+  velocity: 20
+  spin: .00999999978
 --- !u!4 &451641153
 Transform:
   m_ObjectHideFlags: 0
@@ -138,11 +124,25 @@ MonoBehaviour:
   m_GameObject: {fileID: 451641151}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed34eadf0aa64494889ad6638f6e7985, type: 3}
+  m_Script: {fileID: 11500000, guid: 92e249489f63543c885ac94d0b5b3b00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocity: 8
-  spin: .00999999978
+  _radius: 10
+  _height: 100
+  _slices: 74
+  _stacks: 189
+  _offset: 0
+  _twist: 0
+  _frequency: 2
+  _bump: 7
+  _warp: 1
+  _surfaceColor: {r: 1, g: 1, b: 1, a: 1}
+  _lineColor: {r: 1, g: 0, b: 0, a: .568627477}
+  _debug: 0
+  _kernelShader: {fileID: 4800000, guid: ef390bfe222ea4d9eb8e7adc72288e7a, type: 3}
+  _surfaceShader: {fileID: 4800000, guid: f33edb5130bfa478388adbb7df3b9b8a, type: 3}
+  _lineShader: {fileID: 4800000, guid: ed2825438c1e0421d9e72e12fac0521b, type: 3}
+  _debugShader: {fileID: 4800000, guid: 8e25f1b2c1f18429a884abde60e27b2d, type: 3}
 --- !u!1 &483127477
 GameObject:
   m_ObjectHideFlags: 0
@@ -170,7 +170,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: .103448287, b: 0, a: 1}
   m_Intensity: .550000012
-  m_Range: 12.3000002
+  m_Range: 20
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -368,58 +368,8 @@ MonoBehaviour:
   positionFrequency: .200000003
   rotationFrequency: .200000003
   positionAmount: 1
-  rotationAmount: 70
+  rotationAmount: 30
   positionComponents: {x: 1, y: 1, z: 1}
   rotationComponents: {x: 1, y: 1, z: 0}
   positionOctave: 3
   rotationOctave: 3
---- !u!1 &2105581071
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 2105581073}
-  - 114: {fileID: 2105581072}
-  m_Layer: 0
-  m_Name: Streamline
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2105581072
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2105581071}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c8daf798f0664336a4e8b9d914d7502, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _color: {r: 1, g: .360294104, b: .360294104, a: 1}
-  _range: {x: 16, y: 16, z: 30}
-  _velocity: {x: -0, y: -0, z: -14}
-  _noiseDensity: .5
-  _noiseVelocity: 0
-  _random: .5
-  _life: 3
-  _debug: 0
-  _deltaShader: {fileID: 4800000, guid: 6afe8e4e613e44e00bcbd80b0615a8de, type: 3}
-  _lineShader: {fileID: 4800000, guid: 456607e7d289e480eb05f5bc12ad0fe6, type: 3}
-  _debugShader: {fileID: 4800000, guid: 8e25f1b2c1f18429a884abde60e27b2d, type: 3}
---- !u!4 &2105581073
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2105581071}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4

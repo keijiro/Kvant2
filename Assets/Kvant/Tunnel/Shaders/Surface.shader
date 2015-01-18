@@ -1,10 +1,13 @@
-﻿Shader "Hidden/Kvant/Surface"
+﻿//
+// Surface shader for Tunnel surface.
+//
+Shader "Hidden/Kvant/Tunnel/Surface"
 {
     Properties
     {
-        _PositionTex("-", 2D) = ""{}
-        _NormalTex("-", 2D) = ""{}
-        _Color("-", Color) = (1, 1, 1, 1)
+        _PositionTex    ("-", 2D)       = ""{}
+        _NormalTex      ("-", 2D)       = ""{}
+        _Color          ("-", Color)    = (1, 1, 1, 1)
     }
     SubShader
     {

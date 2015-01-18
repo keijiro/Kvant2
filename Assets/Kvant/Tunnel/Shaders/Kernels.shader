@@ -1,13 +1,21 @@
-﻿Shader "Hidden/Kvant/Tunnel/GPGPU"
+﻿//
+// GPGPU kernels for Tunnel.
+//
+// There are three kernels in the shader.
+//
+// Kernel 0 - Generates a vertex array of the fractal tunnel.
+// Kernel 1 - Generates a normal vector array for the 1st half of the lattice.
+// Kernel 2 - Generates a normal vector array for the 2nd half of the lattice.
+//
+Shader "Hidden/Kvant/Tunnel/Kernels"
 {
     Properties
     {
-        _MainTex("-", 2D) = ""{}
-        _Size("-", Vector) = (5, 5, 0, 0)
-        _Offset("-", Vector) = (0, 0, 0, 0)
-        _Period("-", Vector) = (1, 1, 0, 0)
-        _Density("-", Vector) = (1, 1, 0, 0)
-        _Displace("-", Vector) = (0.3, 0.3, 0.3, 0)
+        _MainTex        ("-", 2D)       = ""{}
+        _SizeParams     ("-", Vector)   = (5, 5, 0, 0)
+        _NoiseParams    ("-", Vector)   = (1, 1, 0, 0)
+        _NoisePeriod    ("-", Vector)   = (1, 1, 0, 0)
+        _Displace       ("-", Vector)   = (0.3, 0.3, 0.3, 0)
     }
 
     CGINCLUDE
@@ -19,10 +27,9 @@
 
     sampler2D _MainTex;
     float2 _MainTex_TexelSize;
-    float2 _Size;
-    float2 _Offset;
-    float2 _Period;
-    float2 _Density;
+    float2 _SizeParams;     // (radius, depth)
+    float4 _NoiseParams;    // (freq_x, freq_y, offs_x, offs_y)
+    float2 _NoisePeriod;
     float3 _Displace;
 
     // Base shape (cylinder).
@@ -31,19 +38,19 @@
         float x = cos(uv.x * PI2);
         float y = sin(uv.x * PI2);
         float z = uv.y - 0.5;
-        return float3(x, y, z) * _Size.xxy;
+        return float3(x, y, z) * _SizeParams.xxy;
     }
 
-    // Pass0: position
-    float4 frag_pos(v2f_img i) : SV_Target 
+    // Kernel 0 - position
+    float4 frag_position(v2f_img i) : SV_Target 
     {
         float3 vp = cylinder(i.uv);
 
-        float2 nc1 = i.uv * _Density + _Offset;
+        float2 nc1 = i.uv * _NoiseParams.xy + _NoiseParams.zw;
         float2 nc2 = nc1 + float2(124.343, 311.591);
         float2 nc3 = nc1 + float2(273.534, 178.392);
 
-        float2 np = _Period;
+        float2 np = _NoisePeriod;
 
         float n1 = pnoise(nc1, np) + pnoise(nc1 * 2, np * 2) * 0.5 + pnoise(nc1 * 4, np * 4) * 0.25 + pnoise(nc1 * 8, np * 8) * 0.125;
         float n2 = pnoise(nc2, np) + pnoise(nc2 * 2, np * 2) * 0.5 + pnoise(nc2 * 4, np * 4) * 0.25 + pnoise(nc1 * 8, np * 8) * 0.125;
@@ -53,15 +60,13 @@
         float3 v2 = float3(0, 0, 1);
         float3 v3 = cross(v1, v2);
 
-        float3 d = v1 * n1 * _Displace.x +
-                   v2 * n2 * _Displace.y +
-                   v3 * n3 * _Displace.z;
+        float3 d = v1 * n1 * _Displace.x + v2 * n2 * _Displace.y + v3 * n3 * _Displace.z;
 
         return float4(vp + d, 0);
     }
 
-    // Pass1: normal vector for the 1st submesh
-    float4 frag_norm1(v2f_img i) : SV_Target 
+    // Kernel 1 - normal vector for the 1st submesh
+    float4 frag_normal1(v2f_img i) : SV_Target 
     {
         float2 duv = _MainTex_TexelSize;
 
@@ -74,8 +79,8 @@
         return float4(n, 0);
     }
 
-    // Pass2: normal vector for the 2nd submesh
-    float4 frag_norm2(v2f_img i) : SV_Target 
+    // Kernel 2 - normal vector for the 2nd submesh
+    float4 frag_normal2(v2f_img i) : SV_Target 
     {
         float2 duv = _MainTex_TexelSize;
 
@@ -92,7 +97,6 @@
 
     SubShader
     {
-        // Pass0: position
         Pass
         {
             Fog { Mode off }    
@@ -100,10 +104,9 @@
             #pragma target 3.0
             #pragma glsl
             #pragma vertex vert_img
-            #pragma fragment frag_pos
+            #pragma fragment frag_position
             ENDCG
         }
-        // Pass1: normal vector for the 1st submesh
         Pass
         {
             Fog { Mode off }    
@@ -111,10 +114,9 @@
             #pragma target 3.0
             #pragma glsl
             #pragma vertex vert_img
-            #pragma fragment frag_norm1
+            #pragma fragment frag_normal1
             ENDCG
         }
-        // Pass2: normal vector for the 2nd submesh
         Pass
         {
             Fog { Mode off }    
@@ -122,7 +124,7 @@
             #pragma target 3.0
             #pragma glsl
             #pragma vertex vert_img
-            #pragma fragment frag_norm2
+            #pragma fragment frag_normal2
             ENDCG
         }
     }

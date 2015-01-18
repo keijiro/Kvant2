@@ -1,9 +1,12 @@
-﻿Shader "Hidden/Kvant/Line"
+﻿//
+// Surface shader for Tunnel wire frame.
+//
+Shader "Hidden/Kvant/Tunnel/Line"
 {
     Properties
     {
-        _Color("Color", Color) = (1, 1, 1, 0.5)
-        _PositionTex("-", 2D) = ""{}
+        _PositionTex    ("-", 2D)           = ""{}
+        _Color          ("Color", Color)    = (1, 1, 1, 0.5)
     }
 
     CGINCLUDE
@@ -15,9 +18,10 @@
         float4 position : SV_POSITION;
     };
 
-    half4 _Color;
     sampler2D _PositionTex;
     float4 _PositionTex_TexelSize;
+
+    half4 _Color;
 
     v2f vert(appdata_base v)
     {
