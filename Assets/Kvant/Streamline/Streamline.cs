@@ -11,14 +11,9 @@ namespace Kvant {
 [AddComponentMenu("Kvant/Streamline")]
 public class Streamline : MonoBehaviour
 {
-    #region Private Settings
-
-    const int bufferWidth = 512;
-    const int bufferHeight = 48;
-
-    #endregion
-
     #region Parameters Exposed To Editor
+
+    [SerializeField] int _maxParticles = 32768;
 
     [SerializeField] Vector3 _emitterPosition = Vector3.forward * 20;
     [SerializeField] Vector3 _emitterSize = Vector3.one * 40;
@@ -39,6 +34,69 @@ public class Streamline : MonoBehaviour
 
     [SerializeField] int _randomSeed = 0;
     [SerializeField] bool _debug;
+
+    #endregion
+
+    #region Public Properties
+
+    // Returns the actual number of particles.
+    public int maxParticles {
+        get { return BufferWidth * BufferHeight; }
+    }
+
+    public float throttle {
+        get { return _throttle; }
+        set { _throttle = value; }
+    }
+
+    public Vector3 emitterPosition {
+        get { return _emitterPosition; }
+        set { _emitterPosition = value; }
+    }
+    public Vector3 emitterSize {
+        get { return _emitterSize; }
+        set { _emitterSize = value; }
+    }
+
+    public Vector3 direction {
+        get { return _direction; }
+        set { _direction = value; }
+    }
+    public float spread {
+        get { return _spread; }
+        set { _spread = value; }
+    }
+
+    public float minSpeed {
+        get { return _minSpeed; }
+        set { _minSpeed = value; }
+    }
+    public float maxSpeed {
+        get { return _maxSpeed; }
+        set { _maxSpeed = value; }
+    }
+
+    public float noiseFrequency {
+        get { return _noiseFrequency; }
+        set { _noiseFrequency = value; }
+    }
+    public float noiseSpeed {
+        get { return _noiseSpeed; }
+        set { _noiseSpeed = value; }
+    }
+    public float noiseAnimation {
+        get { return _noiseAnimation; }
+        set { _noiseAnimation = value; }
+    }
+
+    public Color color {
+        get { return _color; }
+        set { _color = value; }
+    }
+    public float tail {
+        get { return _tail; }
+        set { _tail = value; }
+    }
 
     #endregion
 
@@ -70,9 +128,17 @@ public class Streamline : MonoBehaviour
 
     #region Resource Management
 
-    public void NotifyConfigChanged()
+    public void NotifyConfigChange()
     {
         _needsReset = true;
+    }
+
+    int BufferWidth { get { return 256; } }
+
+    int BufferHeight {
+        get {
+            return Mathf.Clamp(_maxParticles / BufferWidth + 1, 1, 127);
+        }
     }
 
     Material CreateMaterial(Shader shader)
@@ -84,7 +150,7 @@ public class Streamline : MonoBehaviour
 
     RenderTexture CreateBuffer()
     {
-        var buffer = new RenderTexture(bufferWidth, bufferHeight, 0, RenderTextureFormat.ARGBFloat);
+        var buffer = new RenderTexture(BufferWidth, BufferHeight, 0, RenderTextureFormat.ARGBFloat);
         buffer.hideFlags = HideFlags.DontSave;
         buffer.filterMode = FilterMode.Point;
         buffer.wrapMode = TextureWrapMode.Repeat;
@@ -93,20 +159,23 @@ public class Streamline : MonoBehaviour
 
     Mesh CreateMesh()
     {
+        var Nx = BufferWidth;
+        var Ny = BufferHeight;
+
         // Create vertex arrays.
-        var VA = new Vector3[bufferWidth * bufferHeight * 2];
-        var TA = new Vector2[bufferWidth * bufferHeight * 2];
+        var VA = new Vector3[Nx * Ny * 2];
+        var TA = new Vector2[Nx * Ny * 2];
 
         var Ai = 0;
-        for (var x = 0; x < bufferWidth; x++)
+        for (var x = 0; x < Nx; x++)
         {
-            for (var y = 0; y < bufferHeight; y++)
+            for (var y = 0; y < Ny; y++)
             {
                 VA[Ai + 0] = new Vector3(0, 0, 0);
                 VA[Ai + 1] = new Vector3(1, 0, 0);
 
-                var u = (float)x / bufferWidth;
-                var v = (float)y / bufferHeight;
+                var u = (float)x / Nx;
+                var v = (float)y / Ny;
                 TA[Ai] = TA[Ai + 1] = new Vector2(u, v);
 
                 Ai += 2;

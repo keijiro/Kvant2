@@ -11,6 +11,8 @@ namespace Kvant {
 [CustomEditor(typeof(Streamline))]
 public class StreamlineEditor : Editor
 {
+    SerializedProperty propMaxParticles;
+
     SerializedProperty propEmitterPosition;
     SerializedProperty propEmitterSize;
     SerializedProperty propThrottle;
@@ -33,6 +35,8 @@ public class StreamlineEditor : Editor
 
     void OnEnable()
     {
+        propMaxParticles    = serializedObject.FindProperty("_maxParticles");
+
         propEmitterPosition = serializedObject.FindProperty("_emitterPosition");
         propEmitterSize     = serializedObject.FindProperty("_emitterSize");
         propThrottle        = serializedObject.FindProperty("_throttle");
@@ -76,6 +80,13 @@ public class StreamlineEditor : Editor
         var emptyLabel = new GUIContent();
 
         serializedObject.Update();
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(propMaxParticles);
+        EditorGUILayout.HelpBox("Actual Number: " + targetStreamline.maxParticles, MessageType.None);
+        if (EditorGUI.EndChangeCheck()) targetStreamline.NotifyConfigChange();
+
+        EditorGUILayout.Space();
 
         EditorGUILayout.LabelField("Emitter Position / Size / Throttle");
         EditorGUILayout.PropertyField(propEmitterPosition, emptyLabel);
