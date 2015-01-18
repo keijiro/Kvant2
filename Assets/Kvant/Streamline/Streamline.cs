@@ -261,6 +261,16 @@ public class Streamline : MonoBehaviour
         _needsReset = true;
     }
 
+    void OnDestroy()
+    {
+        if (_mesh) DestroyImmediate(_mesh);
+        if (_positionBuffer1) DestroyImmediate(_positionBuffer1);
+        if (_positionBuffer2) DestroyImmediate(_positionBuffer2);
+        if (_kernelMaterial)  DestroyImmediate(_kernelMaterial);
+        if (_lineMaterial )   DestroyImmediate(_lineMaterial);
+        if (_debugMaterial)   DestroyImmediate(_debugMaterial);
+    }
+
     void Update()
     {
         if (_needsReset) ResetResources();
