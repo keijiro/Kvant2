@@ -249,6 +249,18 @@ public partial class Spray : MonoBehaviour
         _needsReset = true;
     }
 
+    void OnDestroy()
+    {
+        if (_bulkMesh != null) _bulkMesh.Release();
+        if (_positionBuffer1) DestroyImmediate(_positionBuffer1);
+        if (_positionBuffer2) DestroyImmediate(_positionBuffer2);
+        if (_rotationBuffer1) DestroyImmediate(_rotationBuffer1);
+        if (_rotationBuffer2) DestroyImmediate(_rotationBuffer2);
+        if (_kernelMaterial)  DestroyImmediate(_kernelMaterial);
+        if (_surfaceMaterial) DestroyImmediate(_surfaceMaterial);
+        if (_debugMaterial)   DestroyImmediate(_debugMaterial);
+    }
+
     void Update()
     {
         if (_needsReset) ResetResources();
