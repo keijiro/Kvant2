@@ -38,8 +38,8 @@ Shader "Hidden/Kvant/Spray/Kernels"
     float2 _LifeParams;
     float4 _Direction;
     float4 _SpeedParams;
-    float4 _NoiseParams; // (frequency, speed, animation)
-    float3 _Config; // (throttle, random seed, dT)
+    float4 _NoiseParams;    // (frequency, speed, animation)
+    float3 _Config;         // (throttle, random seed, dT)
 
     // PRNG function.
     float nrand(float2 uv, float salt)

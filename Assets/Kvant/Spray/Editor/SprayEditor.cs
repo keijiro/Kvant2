@@ -150,7 +150,6 @@ public class SprayEditor : Editor
 
         EditorGUILayout.Space();
 
-
         EditorGUILayout.PropertyField(propRandomSeed);
         EditorGUILayout.PropertyField(propDebug);
 

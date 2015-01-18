@@ -24,11 +24,7 @@ Shader "Hidden/Kvant/Spray/Surface"
         #pragma glsl
 
         sampler2D _PositionTex;
-        float2 _PositionTex_TexelSize;
-
         sampler2D _RotationTex;
-        float2 _RotationTex_TexelSize;
-
         float4 _Color;
         float2 _ScaleParams;
         float4 _BufferOffset;

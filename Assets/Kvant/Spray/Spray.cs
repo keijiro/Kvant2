@@ -253,15 +253,13 @@ public partial class Spray : MonoBehaviour
         if (Application.isPlaying)
         {
             // Swap the buffers.
-            {
-                var temp = _positionBuffer1;
-                _positionBuffer1 = _positionBuffer2;
-                _positionBuffer2 = temp;
+            var temp = _positionBuffer1;
+            _positionBuffer1 = _positionBuffer2;
+            _positionBuffer2 = temp;
 
-                temp = _rotationBuffer1;
-                _rotationBuffer1 = _rotationBuffer2;
-                _rotationBuffer2 = temp;
-            }
+            temp = _rotationBuffer1;
+            _rotationBuffer1 = _rotationBuffer2;
+            _rotationBuffer2 = temp;
         }
         else
         {
