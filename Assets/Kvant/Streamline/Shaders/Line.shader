@@ -1,11 +1,17 @@
-﻿Shader "Hidden/Kvant/Streamline/Line"
+﻿//
+// Line shader for Streamline particles.
+//
+// POSITION : [buffer switch (0 or 1), 0, 0, 0]
+// TEXCOORD0: [u, v, 0, 0]
+//
+Shader "Hidden/Kvant/Streamline/Line"
 {
     Properties
     {
-        _PositionTex("-", 2D) = ""{}
-        _PreviousTex("-", 2D) = ""{}
-        _Color("-", Color) = (1, 1, 1, 0.5)
-        _Tail("_", Float) = 1
+        _PositionTex1   ("-", 2D)       = ""{}
+        _PositionTex2   ("-", 2D)       = ""{}
+        _Color          ("-", Color)    = (1, 1, 1, 1)
+        _Tail           ("_", Float)    = 1
     }
 
     CGINCLUDE
@@ -24,9 +30,8 @@
         float4 color : COLOR;
     };
 
-    sampler2D _PositionTex;
-    sampler2D _PreviousTex;
-
+    sampler2D _PositionTex1;
+    sampler2D _PositionTex2;
     half4 _Color;
     float _Tail;
 
@@ -36,22 +41,22 @@
 
         float2 uv = v.texcoord.xy;
 
-        float4 p1 = tex2D(_PositionTex, uv);
-        float4 p2 = tex2D(_PreviousTex, uv);
+        float4 p1 = tex2D(_PositionTex1, uv);
+        float4 p2 = tex2D(_PositionTex2, uv);
         float sw = v.position.x;
 
-        if (p2.w < 0)
+        if (p1.w < 0)
         {
-            o.position = mul(UNITY_MATRIX_MVP, float4(p1.xyz, 1));
+            o.position = mul(UNITY_MATRIX_MVP, float4(p2.xyz, 1));
         }
         else
         {
-            float3 p = lerp(p1.xyz, p2.xyz, sw * _Tail);
+            float3 p = lerp(p2.xyz, p1.xyz, (1.0 - sw) * _Tail);
             o.position = mul(UNITY_MATRIX_MVP, float4(p, 1));
         }
 
         o.color = _Color;
-        o.color.a *= (1.0 - sw);
+        o.color.a *= sw;
 
         return o;
     }

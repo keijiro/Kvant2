@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿//
+// Streamline - line based particle system.
+//
+
+using UnityEngine;
 using System.Collections;
 
 namespace Kvant {
@@ -16,24 +20,35 @@ public class Streamline : MonoBehaviour
 
     #region Parameters Exposed To Editor
 
-    [SerializeField] Color _color = new Color(1, 1, 1, 0.5f);
-    [SerializeField] Vector3 _range = Vector3.one * 100;
-    [SerializeField] Vector3 _velocity = Vector3.forward * -10;
+    [SerializeField] Vector3 _emitterPosition = Vector3.forward * 20;
+    [SerializeField] Vector3 _emitterSize = Vector3.one * 40;
+    [SerializeField] float _throttle = 1.0f;
+
+    [SerializeField] Vector3 _direction = -Vector3.forward;
+    [SerializeField] float _spread = 0.2f;
+
+    [SerializeField] float _minSpeed = 5.0f;
+    [SerializeField] float _maxSpeed = 10.0f;
+
+    [SerializeField] float _noiseFrequency = 0.2f;
+    [SerializeField] float _noiseSpeed = 0.1f;
+    [SerializeField] float _noiseAnimation = 1.0f;
+
+    [SerializeField] Color _color = Color.white;
     [SerializeField] float _tail = 1.0f;
-    [SerializeField] float _noiseVelocity = 0.0f;
-    [SerializeField] float _noiseDensity = 0.5f;
-    [SerializeField] float _random = 0.5f;
+
+    [SerializeField] int _randomSeed = 0;
     [SerializeField] bool _debug;
 
     #endregion
 
     #region Shader And Materials
 
-    [SerializeField] Shader _deltaShader;
+    [SerializeField] Shader _kernelShader;
     [SerializeField] Shader _lineShader;
     [SerializeField] Shader _debugShader;
 
-    Material _deltaMaterial;
+    Material _kernelMaterial;
     Material _lineMaterial;
     Material _debugMaterial;
 
@@ -41,8 +56,8 @@ public class Streamline : MonoBehaviour
 
     #region GPGPU Buffers
 
-    RenderTexture _positionBuffer;
-    RenderTexture _previousBuffer;
+    RenderTexture _positionBuffer1;
+    RenderTexture _positionBuffer2;
 
     #endregion
 
@@ -60,6 +75,13 @@ public class Streamline : MonoBehaviour
         _needsReset = true;
     }
 
+    Material CreateMaterial(Shader shader)
+    {
+        var material = new Material(shader);
+        material.hideFlags = HideFlags.DontSave;
+        return material;
+    }
+
     RenderTexture CreateBuffer()
     {
         var buffer = new RenderTexture(bufferWidth, bufferHeight, 0, RenderTextureFormat.ARGBFloat);
@@ -67,13 +89,6 @@ public class Streamline : MonoBehaviour
         buffer.filterMode = FilterMode.Point;
         buffer.wrapMode = TextureWrapMode.Repeat;
         return buffer;
-    }
-
-    Material CreateMaterial(Shader shader)
-    {
-        var material = new Material(shader);
-        material.hideFlags = HideFlags.DontSave;
-        return material;
     }
 
     Mesh CreateMesh()
@@ -110,7 +125,7 @@ public class Streamline : MonoBehaviour
         mesh.Optimize();
 
         // Avoid being culled.
-        mesh.bounds = new Bounds(Vector3.zero, _range);
+        mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000);
 
         // This only for temporary use. Don't save.
         mesh.hideFlags = HideFlags.DontSave;
@@ -118,27 +133,52 @@ public class Streamline : MonoBehaviour
         return mesh;
     }
 
+    void ApplyKernelParameters()
+    {
+        _kernelMaterial.SetVector("_EmitterPos", _emitterPosition);
+        _kernelMaterial.SetVector("_EmitterSize", _emitterSize);
+
+        var dir = new Vector4(_direction.x, _direction.y, _direction.z, _spread);
+        _kernelMaterial.SetVector("_Direction", dir);
+
+        _kernelMaterial.SetVector("_SpeedParams", new Vector2(_minSpeed, _maxSpeed));
+
+        if (_noiseSpeed > 0)
+        {
+            var np = new Vector3(_noiseFrequency, _noiseSpeed, _noiseAnimation);
+            _kernelMaterial.SetVector("_NoiseParams", np);
+            _kernelMaterial.EnableKeyword("NOISE_ON");
+        }
+        else
+        {
+            _kernelMaterial.DisableKeyword("NOISE_ON");
+        }
+
+        var life = 2.0f;
+        var delta = Application.isPlaying ? Time.smoothDeltaTime : 1.0f / 30;
+        _kernelMaterial.SetVector("_Config", new Vector4(_throttle, life, _randomSeed, delta));
+    }
+
     void ResetResources()
     {
-        // GPGPU buffers.
-        if (_positionBuffer) DestroyImmediate(_positionBuffer);
-        if (_previousBuffer) DestroyImmediate(_previousBuffer);
-
-        _positionBuffer = CreateBuffer();
-        _previousBuffer = CreateBuffer();
-
-        // Shader materials.
-        if (!_deltaMaterial) _deltaMaterial = CreateMaterial(_deltaShader);
-        if (!_lineMaterial ) _lineMaterial  = CreateMaterial(_lineShader );
-        if (!_debugMaterial) _debugMaterial = CreateMaterial(_debugShader);
-
-        // Initialization.
-        _deltaMaterial.SetVector("_Range", _range);
-        Graphics.Blit(null, _previousBuffer, _deltaMaterial, 0);
-        Graphics.Blit(null, _positionBuffer, _deltaMaterial, 0);
-
         // Mesh object.
         if (_mesh == null) _mesh = CreateMesh();
+
+        // GPGPU buffers.
+        if (_positionBuffer1) DestroyImmediate(_positionBuffer1);
+        if (_positionBuffer2) DestroyImmediate(_positionBuffer2);
+
+        _positionBuffer1 = CreateBuffer();
+        _positionBuffer2 = CreateBuffer();
+
+        // Shader materials.
+        if (!_kernelMaterial) _kernelMaterial = CreateMaterial(_kernelShader );
+        if (!_lineMaterial )  _lineMaterial   = CreateMaterial(_lineShader );
+        if (!_debugMaterial)  _debugMaterial  = CreateMaterial(_debugShader);
+
+        // Initialization.
+        ApplyKernelParameters();
+        Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
 
         _needsReset = false;
     }
@@ -156,33 +196,31 @@ public class Streamline : MonoBehaviour
     {
         if (_needsReset) ResetResources();
 
-        // Swap the position buffers.
-        {
-            var temp = _previousBuffer;
-            _previousBuffer = _positionBuffer;
-            _positionBuffer = temp;
-        }
+        ApplyKernelParameters();
 
-        // Apply the delta shader.
-        _deltaMaterial.SetVector("_Range", _range);
-        _deltaMaterial.SetVector("_Velocity", _velocity);
-        _deltaMaterial.SetFloat("_Random", _random);
-
-        if (_noiseVelocity > 0)
+        if (Application.isPlaying)
         {
-            _deltaMaterial.EnableKeyword("NOISE_ON");
-            _deltaMaterial.SetVector("_Noise", new Vector2(_noiseDensity, _noiseVelocity));
+            // Swap the buffers.
+            var temp = _positionBuffer1;
+            _positionBuffer1 = _positionBuffer2;
+            _positionBuffer2 = temp;
+
+            // Apply the kernel shader.
+            Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 1);
         }
         else
         {
-            _deltaMaterial.DisableKeyword("NOISE_ON");
+            // Editor: initialize the buffer on every update.
+            Graphics.Blit(null, _positionBuffer2, _kernelMaterial, 0);
+
+            // Apply the kernel shader.
+            Graphics.Blit(_positionBuffer2, _positionBuffer1, _kernelMaterial, 1);
+            Graphics.Blit(_positionBuffer1, _positionBuffer2, _kernelMaterial, 1);
         }
 
-        Graphics.Blit(_previousBuffer, _positionBuffer, _deltaMaterial, 1);
-
         // Draw lines.
-        _lineMaterial.SetTexture("_PreviousTex", _previousBuffer);
-        _lineMaterial.SetTexture("_PositionTex", _positionBuffer);
+        _lineMaterial.SetTexture("_PositionTex1", _positionBuffer1);
+        _lineMaterial.SetTexture("_PositionTex2", _positionBuffer2);
         _lineMaterial.SetColor("_Color", _color);
         _lineMaterial.SetFloat("_Tail", _tail);
         Graphics.DrawMesh(_mesh, transform.position, transform.rotation, _lineMaterial, 0);
@@ -190,13 +228,11 @@ public class Streamline : MonoBehaviour
 
     void OnGUI()
     {
-        if (_debug && Event.current.type.Equals(EventType.Repaint) && _debugMaterial)
-        {
-            var w = 64;
-            var r1 = new Rect(0 * w, 0, w, w);
-            var r2 = new Rect(1 * w, 0, w, w);
-            if (_positionBuffer) Graphics.DrawTexture(r1, _positionBuffer, _debugMaterial);
-            if (_previousBuffer) Graphics.DrawTexture(r2, _previousBuffer, _debugMaterial);
+        if (_debug && Event.current.type.Equals(EventType.Repaint)) {
+            if (_debugMaterial && _positionBuffer2) {
+                var rect = new Rect(0, 0, 256, 64);
+                Graphics.DrawTexture(rect, _positionBuffer2, _debugMaterial);
+            }
         }
     }
 

@@ -274,14 +274,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c8daf798f0664336a4e8b9d914d7502, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _emitterPosition: {x: 0, y: 0, z: 20}
+  _emitterSize: {x: 40, y: 40, z: 40}
+  _throttle: 1
+  _direction: {x: -0, y: -0, z: -1}
+  _spread: .0920000002
+  _minSpeed: 2.65625
+  _maxSpeed: 12.7624998
+  _noiseFrequency: .200000003
+  _noiseSpeed: .100000001
+  _noiseAnimation: 1
   _color: {r: 1, g: 1, b: 1, a: 1}
-  _range: {x: 50, y: 50, z: 50}
-  _velocity: {x: -0, y: -0, z: -30}
-  _noiseVelocity: 5
-  _noiseDensity: .100000001
-  _random: .5
+  _tail: 1.79999995
+  _randomSeed: 3
   _debug: 0
-  _deltaShader: {fileID: 4800000, guid: 6afe8e4e613e44e00bcbd80b0615a8de, type: 3}
+  _kernelShader: {fileID: 4800000, guid: 6afe8e4e613e44e00bcbd80b0615a8de, type: 3}
   _lineShader: {fileID: 4800000, guid: 456607e7d289e480eb05f5bc12ad0fe6, type: 3}
   _debugShader: {fileID: 4800000, guid: 8e25f1b2c1f18429a884abde60e27b2d, type: 3}
 --- !u!4 &1429600555
@@ -291,7 +298,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1429600553}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 10}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
